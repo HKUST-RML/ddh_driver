@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import os
 import time
 import numpy as np
 from numpy import deg2rad, rad2deg
@@ -28,7 +29,9 @@ def set_input_bandwidth(axis, BW):
 
 class DDGripper(object):
 
-    def __init__(self, config_path):
+    def __init__(self, config_name):
+        config_path = os.path.join(os.path.dirname(__file__), '..', 'config', config_name + '.yaml')
+        print('load config %s' % os.path.abspath(config_path))
         with open(config_path, 'r') as stream:
             try:
                 print('reading gripper config...')
