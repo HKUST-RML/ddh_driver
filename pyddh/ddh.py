@@ -4,9 +4,6 @@ import time
 import numpy as np
 from numpy import deg2rad, rad2deg
 
-# from odrive_msgs.msg import Odrive, OdriveStamped, Axis
-# from ddh_gripper.msg import GripperCmd, FingerState, GripperState
-# import rospy
 import odrive
 from odrive.enums import *
 import yaml
@@ -27,28 +24,6 @@ def set_pos_gain(axis, pos_gain):
 
 def set_input_bandwidth(axis, BW):
     axis.controller.config.input_filter_bandwidth = BW
-
-# def axis2ros(ax):
-#     msg = Axis()
-#     msg.pos_estimate = ax.encoder.pos_estimate
-#     msg.vel_estimate = ax.encoder.vel_estimate
-#     msg.input_pos = ax.controller.input_pos
-#     msg.input_vel = ax.controller.input_vel
-#     msg.input_torque = ax.controller.input_torque
-#     msg.setpoint_pos = ax.controller.pos_setpoint
-#     msg.setpoint_vel = ax.controller.vel_setpoint
-#     msg.setpoint_torque = ax.controller.torque_setpoint
-#     msg.current_meas_phB = ax.motor.current_meas_phB
-#     msg.current_meas_phC = ax.motor.current_meas_phC
-#     msg.fet_thermistor_temperature = ax.fet_thermistor.temperature
-#     return msg
-
-
-# def odrive2ros(od):
-#     msg = Odrive()
-#     msg.axis0 = axis2ros(od.axis0)
-#     msg.axis1 = axis2ros(od.axis1)
-#     return msg
 
 
 class DDGripper(object):
@@ -107,14 +82,6 @@ class DDGripper(object):
         print('found left finger')
         self.finger_R = odrive.find_any(serial_number='207C39785453')
         print('found right fingers')
-        # arm(self.finger_L.axis0)
-        # arm(self.finger_L.axis1)
-        # arm(self.finger_R.axis0)
-        # arm(self.finger_R.axis1)
-        # self.pub_odrive_L = rospy.Publisher('/ddh/odrive/L', OdriveStamped, queue_size=10)
-        # self.pub_odrive_R = rospy.Publisher('/ddh/odrive/R', OdriveStamped, queue_size=10)
-        # self.pub_gripper_state = rospy.Publisher('/ddh/state', GripperState, queue_size=10)
-        # self.timer = rospy.Timer(rospy.Duration(0.02), self.refresh)
 
     def arm(self, gain = 250, BW = 500):
         arm(self.finger_L.axis0, gain, BW)
@@ -405,33 +372,6 @@ class DDGripper(object):
         self.set_left_a1_phi(-angle, phi)
         self.set_right_a1_phi(angle, phi)
 
-    # def publish_gripper_state(self):
-    #     msg = GripperState()
-    #     msg.header.stamp = rospy.Time.now()
-    #     msg.header.frame_id = 'world'
-    #     # motor pos
-    #     msg.right.motor_pos_0 = self.motor_pos_r0
-    #     msg.right.motor_pos_1 = self.motor_pos_r1
-    #     msg.left.motor_pos_0 = self.motor_pos_l0
-    #     msg.left.motor_pos_1 = self.motor_pos_l1
-    #     # link pos
-    #     msg.right.link_pos_0 = self.link_pos_r0
-    #     msg.right.link_pos_1 = self.link_pos_r1
-    #     msg.left.link_pos_0 = self.link_pos_l0
-    #     msg.left.link_pos_1 = self.link_pos_l1
-    #     self.pub_gripper_state.publish(msg)
-
-    # def refresh(self, t):
-    #     msg_r = OdriveStamped()
-    #     msg_r.header.stamp = rospy.Time.now()
-    #     msg_r.odrive = odrive2ros(self.finger_R)
-    #     self.pub_odrive_R.publish(msg_r)
-    #     msg_l = OdriveStamped()
-    #     msg_l.header.stamp = rospy.Time.now()
-    #     msg_l.odrive = odrive2ros(self.finger_L)
-    #     self.pub_odrive_L.publish(msg_l)
-    #     self.publish_gripper_state()
-
     def startup_dance(self):
         self.set_left_a1_a2(-90, 25)
         self.set_right_a1_a2(90, 25)
@@ -447,21 +387,3 @@ class DDGripper(object):
         self.set_parallel_jaw(-10, -15)
         time.sleep(0.5)
         self.set_parallel_jaw(0, 0)
-
-
-if __name__ == "__main__":
-    # rospy.init_node('ddh_driver_node')
-    gripper = DDGripper("ddh_scooping")
-    gripper.arm()
-    # gripper.startup_dance()
-    # gripper.set_left_tip((150,0))
-    # gripper.set_right_tip((150,0))
-    gripper.set_left_tip((157, 40))
-    gripper.set_right_tip((157, -40))
-    # while 1:
-    #     print("=========================")
-    #     # print(gripper.left_tip_pos,gripper.right_tip_pos)
-    #     print((gripper.left_a2 + gripper.right_a2)/2)
-    #     time.sleep(0.2)
-
-    # rospy.spin()
