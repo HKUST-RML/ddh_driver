@@ -8,7 +8,7 @@ import odrive
 from odrive.enums import *
 import yaml
 import dpath.util as dpath
-
+from .actuator import Actuator
 
 def arm(axis, gain, BW):
     axis.controller.config.input_mode = INPUT_MODE_POS_FILTER #INPUT_MODE_PASSTHROUGH
@@ -74,7 +74,12 @@ class DDGripper(object):
         self.finger_R = odrive.find_any(serial_number=self.odrive_serial_R)
         print('found right finger')
 
-    def arm(self, gain = 250, BW = 500):
+        self.R0 = Actuator(self.finger_R.axis0, self.R0_offset, self.R0_dir, self.R0_link)
+        self.R1 = Actuator(self.finger_R.axis1, self.R1_offset, self.R1_dir, self.R1_link)
+        self.L0 = Actuator(self.finger_L.axis0, self.L0_offset, self.L0_dir, self.L0_link)
+        self.L1 = Actuator(self.finger_L.axis1, self.L1_offset, self.L1_dir, self.L1_link)
+
+    def arm(self, gain=250, BW=500):
         arm(self.finger_L.axis0, gain, BW)
         arm(self.finger_L.axis1, gain, BW)
         arm(self.finger_R.axis0, gain, BW)
@@ -86,7 +91,7 @@ class DDGripper(object):
         disarm(self.finger_R.axis0)
         disarm(self.finger_R.axis1)
 
-    def set_stiffness(self, gain, finger = 'LR'):
+    def set_stiffness(self, gain, finger='LR'):
         if finger == 'LR':
             set_pos_gain(self.finger_L.axis0, gain)
             set_pos_gain(self.finger_L.axis1, gain)
