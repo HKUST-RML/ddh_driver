@@ -1,3 +1,6 @@
+odrive_serial:
+  R: '207C39785453'
+  L: '207E39775453'
 motors:
   R0:
     offset: 0.30837726593

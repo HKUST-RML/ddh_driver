@@ -1,12 +1,12 @@
 #!/usr/bin/python3
-import time
 
+import time
 import numpy as np
 from numpy import deg2rad, rad2deg
-
 import odrive
 from odrive.enums import *
 import yaml
+import dpath.util as dpath
 
 
 def arm(axis, gain, BW):
@@ -28,60 +28,48 @@ def set_input_bandwidth(axis, BW):
 
 class DDGripper(object):
 
-    def __init__(self, config_name):
-        config_file = config_name + ".yaml"
-        with open("../config/"+config_file, 'r') as stream:
+    def __init__(self, config_path):
+        with open(config_path, 'r') as stream:
             try:
                 print('reading gripper config...')
                 config = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
                 print(exc)
+        self.odrive_serial_R = dpath.get(config, 'odrive_serial/R')
+        self.odrive_serial_L = dpath.get(config, 'odrive_serial/L')
+        self.R0_offset = dpath.get(config, 'motors/R0/offset')
+        self.R0_dir = dpath.get(config, 'motors/R0/dir')
+        self.R1_offset = dpath.get(config, 'motors/R1/offset')
+        self.R1_dir = dpath.get(config, 'motors/R1/dir')
+        self.L0_offset = dpath.get(config, 'motors/L0/offset')
+        self.L0_dir = dpath.get(config, 'motors/L0/dir')
+        self.L1_offset = dpath.get(config, 'motors/L1/offset')
+        self.L1_dir = dpath.get(config, 'motors/L1/dir')
+        self.R0_link = dpath.get(config, 'linkages/R0')
+        self.R1_link = dpath.get(config, 'linkages/R1')
+        self.L0_link = dpath.get(config, 'linkages/L0')
+        self.L1_link = dpath.get(config, 'linkages/L1')
+        self.geometry_l1 = dpath.get(config, 'geometry/l1')
+        self.geometry_l2 = dpath.get(config, 'geometry/l2')
+        self.geometry_beta = dpath.get(config, 'geometry/beta')
+        self.geometry_l3 = dpath.get(config, 'geometry/l3')
+        self.geometry_gamma = dpath.get(config, 'geometry/gamma')
+        self.r_max_offset = dpath.get(config, 'geometry/r_max_offset')
+        self.r_min_offset = dpath.get(config, 'geometry/r_min_offset')
 
-        # self.R0_offset = rospy.get_param('/motors/R0/offset')
-        # self.R0_dir = rospy.get_param('/motors/R0/dir')
-        # self.R1_offset = rospy.get_param('/motors/R1/offset')
-        # self.R1_dir = rospy.get_param('/motors/R1/dir')
-        # self.L0_offset = rospy.get_param('/motors/L0/offset')
-        # self.L0_dir = rospy.get_param('/motors/L0/dir')
-        # self.L1_offset = rospy.get_param('/motors/L1/offset')
-        # self.L1_dir = rospy.get_param('/motors/L1/dir')
-        # self.R0_link = rospy.get_param('/linkages/R0')
-        # self.R1_link = rospy.get_param('/linkages/R1')
-        # self.L0_link = rospy.get_param('/linkages/L0')
-        # self.L1_link = rospy.get_param('/linkages/L1')
-        # self.geometry_l1 = rospy.get_param('/geometry/l1')
-        # self.geometry_l2 = rospy.get_param('/geometry/l2')
-        # self.geometry_beta = rospy.get_param('/geometry/beta')
-        self.R0_offset = config['motors']['R0']['offset']
-        self.R0_dir = config['motors']['R0']['dir']
-        self.R1_offset = config['motors']['R1']['offset']
-        self.R1_dir = config['motors']['R1']['dir']
-        self.L0_offset = config['motors']['L0']['offset']
-        self.L0_dir = config['motors']['L0']['dir']
-        self.L1_offset =config['motors']['L1']['offset']
-        self.L1_dir = config['motors']['L1']['dir']
-        self.R0_link = config['linkages']['R0']
-        self.R1_link = config['linkages']['R1']
-        self.L0_link = config['linkages']['L0']
-        self.L1_link = config['linkages']['L1']
-        self.geometry_l1 = config['geometry']['l1']
-        self.geometry_l2 = config['geometry']['l2']
-        self.geometry_beta = config['geometry']['beta']
-        self.geometry_l3 = config['geometry']['l3']
-        self.geometry_gamma = config['geometry']['gamma']
         # virtual link formed by l2 and l3
         self._l3 = np.sqrt(self.geometry_l2**2 + self.geometry_l3**2 - 2 * self.geometry_l2 * self.geometry_l3 * np.cos(deg2rad(self.geometry_gamma)))
         # angle between l2 and _l3
         self._gamma = rad2deg(np.arcsin(np.sin(deg2rad(self.geometry_gamma))/self._l3*self.geometry_l3))
         # range of IK for the distal joint
-        self.r_min = np.sqrt(self.geometry_l1**2 - self.geometry_l2**2) + config['geometry']['r_min_offset']
-        self.r_max = self.geometry_l1 + self.geometry_l2 - config['geometry']['r_max_offset']
+        self.r_min = np.sqrt(self.geometry_l1**2 - self.geometry_l2**2) + self.r_min_offset
+        self.r_max = self.geometry_l1 + self.geometry_l2 - self.r_max_offset
 
         print('connecting to odrive...')
-        self.finger_L = odrive.find_any(serial_number='207E39775453')
+        self.finger_L = odrive.find_any(serial_number=self.odrive_serial_L)
         print('found left finger')
-        self.finger_R = odrive.find_any(serial_number='207C39785453')
-        print('found right fingers')
+        self.finger_R = odrive.find_any(serial_number=self.odrive_serial_R)
+        print('found right finger')
 
     def arm(self, gain = 250, BW = 500):
         arm(self.finger_L.axis0, gain, BW)

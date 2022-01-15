@@ -1,2 +1,4 @@
 dpath
+numpy
+PyYAML
 odrive
