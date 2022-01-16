@@ -113,52 +113,20 @@ class DDGripper(object):
         set_input_bandwidth(self.finger_R.axis1, BW)
 
     @property
-    def motor_pos_r0(self):
-        return 360 * self.R0_dir * (self.finger_R.axis0.encoder.pos_estimate - self.R0_offset)
-
-    @property
-    def motor_pos_r1(self):
-        return 360 * self.R1_dir * (self.finger_R.axis1.encoder.pos_estimate - self.R1_offset)
-
-    @property
-    def motor_pos_l0(self):
-        return 360 * self.L0_dir * (self.finger_L.axis0.encoder.pos_estimate - self.L0_offset)
-
-    @property
-    def motor_pos_l1(self):
-        return 360 * self.L1_dir * (self.finger_L.axis1.encoder.pos_estimate - self.L1_offset)
-
-    @property
-    def link_pos_r0(self):
-        return self.motor_pos_r0 + self.R0_link
-
-    @property
-    def link_pos_r1(self):
-        return self.motor_pos_r1 + self.R1_link
-
-    @property
-    def link_pos_l0(self):
-        return self.motor_pos_l0 + self.L0_link
-
-    @property
-    def link_pos_l1(self):
-        return self.motor_pos_l1 + self.L1_link
-
-    @property
     def right_a1(self):
-        return (self.link_pos_r0+self.link_pos_r1)/2
+        return (self.R0.theta+self.R1.theta)/2
 
     @property
     def right_a2(self):
-        return (self.link_pos_r1-self.link_pos_r0)/2
+        return (self.R1.theta-self.R0.theta)/2
 
     @property
     def left_a1(self):
-        return (self.link_pos_l0+self.link_pos_l1)/2
+        return (self.L0.theta+self.L1.theta)/2
 
     @property
     def left_a2(self):
-        return (self.link_pos_l0-self.link_pos_l1)/2
+        return (self.L0.theta-self.L1.theta)/2
 
     # r: distance from motor joint to distal joint (base joint of finger)
 
@@ -222,61 +190,27 @@ class DDGripper(object):
         y = self.right_finger_pos[1] + self.geometry_l3 * np.sin(deg2rad(q_tip))
         return x, y
 
-    # first control the position of individual links
-
-    def set_link_pos_r0(self, link_pos):
-        motor_pos = link_pos - self.R0_link
-        motor_pos = motor_pos/360.
-        motor_input = motor_pos * self.R0_dir + self.R0_offset
-        self.finger_R.axis0.controller.input_pos = motor_input
-
-    def set_link_pos_r1(self, link_pos):
-        motor_pos = link_pos - self.R1_link
-        motor_pos = motor_pos/360.
-        motor_input = motor_pos * self.R1_dir + self.R1_offset
-        self.finger_R.axis1.controller.input_pos = motor_input
-
-    def set_link_pos_l0(self, link_pos):
-        motor_pos = link_pos - self.L0_link
-        motor_pos = motor_pos/360.
-        motor_input = motor_pos * self.L0_dir + self.L0_offset
-        self.finger_L.axis0.controller.input_pos = motor_input
-
-    def set_link_pos_l1(self, link_pos):
-        motor_pos = link_pos - self.L1_link
-        motor_pos = motor_pos/360.
-        motor_input = motor_pos * self.L1_dir + self.L1_offset
-        self.finger_L.axis1.controller.input_pos = motor_input
-
     # then control the finger (a1,a2)
 
     def set_right_a1(self, a1):
-        a2 = self.right_a2
-        self.set_link_pos_r0(a1-a2)
-        self.set_link_pos_r1(a1+a2)
+        self.set_right_a1_a2(a1, self.right_a2)
 
     def set_right_a2(self, a2):
-        a1 = self.right_a1
-        self.set_link_pos_r0(a1-a2)
-        self.set_link_pos_r1(a1+a2)
+        self.set_right_a1_a2(self.right_a1, a2)
 
     def set_right_a1_a2(self, a1, a2):
-        self.set_link_pos_r0(a1-a2)
-        self.set_link_pos_r1(a1+a2)
+        self.R0.theta = a1-a2
+        self.R1.theta = a1+a2
 
     def set_left_a1(self, a1):
-        a2 = self.left_a2
-        self.set_link_pos_l0(a1+a2)
-        self.set_link_pos_l1(a1-a2)
+        self.set_left_a1_a2(a1, self.left_a2)
 
     def set_left_a2(self, a2):
-        a1 = self.left_a1
-        self.set_link_pos_l0(a1+a2)
-        self.set_link_pos_l1(a1-a2)
+        self.set_left_a1_a2(self.left_a1, a2)
 
     def set_left_a1_a2(self, a1, a2):
-        self.set_link_pos_l0(a1+a2)
-        self.set_link_pos_l1(a1-a2)
+        self.L0.theta = a1+a2
+        self.L1.theta = a1-a2
 
     # then add inverse kinematics
 
