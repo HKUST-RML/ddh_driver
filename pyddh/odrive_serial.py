@@ -1,5 +1,3 @@
-#!/usr/env python
-
 import odrive
 
 if __name__ == '__main__':
