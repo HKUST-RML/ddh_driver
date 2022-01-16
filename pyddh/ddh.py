@@ -61,6 +61,10 @@ class DDGripper(object):
         self.L0 = Actuator(self.finger_L.axis0, self.L0_offset, self.L0_dir, self.L0_link)
         self.L1 = Actuator(self.finger_L.axis1, self.L1_offset, self.L1_dir, self.L1_link)
 
+    @property
+    def actuators(self):
+        return [self.R0, self.R1, self.L0, self.L1]
+
     def arm(self, gain=250, BW=500):
         for actuator in [self.R0, self.R1, self.L0, self.L1]:
             actuator.bandwidth = BW

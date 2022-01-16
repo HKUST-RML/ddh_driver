@@ -10,6 +10,10 @@ class Actuator(object):
         self.link_offset = link_offset
 
     @property
+    def encoder(self):
+        return self.axis.encoder.pos_estimate
+
+    @property
     def motor_pos(self):
         return 360 * self.direction * (self.axis.encoder.pos_estimate - self.encoder_offset)
 

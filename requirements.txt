@@ -2,3 +2,4 @@ dpath
 numpy
 PyYAML
 odrive
+pylsl
