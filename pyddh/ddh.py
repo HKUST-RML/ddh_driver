@@ -6,7 +6,7 @@ import odrive
 from odrive.enums import *
 import yaml
 import dpath.util as dpath
-from .actuator import Actuator
+from actuator import Actuator
 
 
 class DDGripper(object):
