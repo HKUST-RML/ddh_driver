@@ -16,7 +16,7 @@ class LslStreamer(object):
         self.outlet_actuators = StreamOutlet(self.info_actuators)
 
     def build_info_actuators(self):
-        info = StreamInfo('ddh_actuators', 'data', 10, 100, 'float32', 'myuid34234')
+        info = StreamInfo('ddh_actuators', 'data', 12, 100, 'float32', 'ddh')
         channel_names = []
         for actuator in ['R0', 'R1', 'L0', 'L1']:
             channel_names.append(actuator + "_encoder")
@@ -39,7 +39,7 @@ class LslStreamer(object):
         while self.keep_alive:
             time.sleep(1./self.hz)
             data = []
-            for actuator in [self.gripper.actuators]:
+            for actuator in self.gripper.actuators:
                 data.extend([actuator.encoder, actuator.motor_pos, actuator.theta])
             self.outlet_actuators.push_sample(data)
 
