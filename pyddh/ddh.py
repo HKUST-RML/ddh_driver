@@ -10,22 +10,6 @@ import yaml
 import dpath.util as dpath
 from .actuator import Actuator
 
-def arm(axis, gain, BW):
-    axis.controller.config.input_mode = INPUT_MODE_POS_FILTER #INPUT_MODE_PASSTHROUGH
-    axis.requested_state = AXIS_STATE_CLOSED_LOOP_CONTROL
-    axis.controller.config.pos_gain = gain
-    axis.controller.config.vel_gain = 1
-    axis.controller.config.input_filter_bandwidth = BW
-
-def disarm(axis):
-    axis.requested_state = AXIS_STATE_IDLE
-
-def set_pos_gain(axis, pos_gain):
-    axis.controller.config.pos_gain = pos_gain 
-
-def set_input_bandwidth(axis, BW):
-    axis.controller.config.input_filter_bandwidth = BW
-
 
 class DDGripper(object):
 
@@ -80,37 +64,29 @@ class DDGripper(object):
         self.L1 = Actuator(self.finger_L.axis1, self.L1_offset, self.L1_dir, self.L1_link)
 
     def arm(self, gain=250, BW=500):
-        arm(self.finger_L.axis0, gain, BW)
-        arm(self.finger_L.axis1, gain, BW)
-        arm(self.finger_R.axis0, gain, BW)
-        arm(self.finger_R.axis1, gain, BW)
+        for actuator in [self.R0, self.R1, self.L0, self.L1]:
+            actuator.bandwidth = BW
+            actuator.stiffness = gain
+            actuator.armed = True
 
     def disarm(self):
-        disarm(self.finger_L.axis0)
-        disarm(self.finger_L.axis1)
-        disarm(self.finger_R.axis0)
-        disarm(self.finger_R.axis1)
+        for actuator in [self.R0, self.R1, self.L0, self.L1]:
+            actuator.armed = False
 
     def set_stiffness(self, gain, finger='LR'):
+        selected_actuators = []
         if finger == 'LR':
-            set_pos_gain(self.finger_L.axis0, gain)
-            set_pos_gain(self.finger_L.axis1, gain)
-            set_pos_gain(self.finger_R.axis0, gain)
-            set_pos_gain(self.finger_R.axis1, gain)
+            selected_actuators = [self.R0, self.R1, self.L0, self.L1]
         elif finger == 'L':
-            set_pos_gain(self.finger_L.axis0, gain)
-            set_pos_gain(self.finger_L.axis1, gain)
+            selected_actuators = [self.L0, self.L1]
         elif finger == 'R':
-            set_pos_gain(self.finger_R.axis0, gain)
-            set_pos_gain(self.finger_R.axis1, gain)
-        else:
-            print("Invalid finger argument.")
+            selected_actuators = [self.R0, self.R1]
+        for actuator in selected_actuators:
+            actuator.stiffness = gain
 
     def set_bandwidth(self, BW):
-        set_input_bandwidth(self.finger_L.axis0, BW)
-        set_input_bandwidth(self.finger_L.axis1, BW)
-        set_input_bandwidth(self.finger_R.axis0, BW)
-        set_input_bandwidth(self.finger_R.axis1, BW)
+        for actuator in [self.R0, self.R1, self.L0, self.L1]:
+            actuator.bandwidth = BW
 
     @property
     def right_a1(self):
