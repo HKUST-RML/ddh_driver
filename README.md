@@ -31,16 +31,16 @@
 
 # Getting Started
 
-First you need to assemble and calibrate the grippr following the instruction in [ddh_hardware]().
+First you need to assemble and calibrate the grippr following the instruction in [ddh_hardware](https://github.com/HKUST-RML/ddh_hardware).
 
-See  `examples/hello-world.ipynb` for a simple example.
+See [hello-world.ipynb](https://github.com/HKUST-RML/pyddh/blob/master/examples/hello-world.ipynb) for a simple example.
 
 
 
 # API
 
 ```python
-from from pyddh import DDGripper
+from pyddh import DDGripper
 ```
 
 Connect to the gripper using `config/ddh_default.yaml`.
