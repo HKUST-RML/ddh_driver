@@ -56,6 +56,10 @@ gripper.arm(gain=250,BW=500)  # gain and bandwidth optional
 gripper.disarm()
 ```
 
+
+
+### Control Individual Actuator
+
 Control individual actuator, the same applies to `R0`, `R1`, `L0`, `L1`
 
 ```python
@@ -74,5 +78,22 @@ gripper.motor_pos = 0
 
 # Read the raw encoder raeding
 print(gripper.R0.encoder)
+```
+
+
+
+### Control Finger
+
+```python
+# Control link angles directly
+gripper.R0.theta = xxx
+gripper.R1.theta = xxx
+
+# Control using alpha1-alpha2 parameterization
+print(gripper.right_a1)
+print(gripper.right_a2)
+gripper.set_right_a1_a1(10,10)
+gripper.set_right_a1(10)
+gripper.set_right_a2(10)
 ```
 
