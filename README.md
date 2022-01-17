@@ -97,3 +97,7 @@ gripper.set_right_a1(10)
 gripper.set_right_a2(10)
 ```
 
+
+
+## Maintenance
+For any technical issues, please contact Pu Xu (pxuaf@connect.ust.hk) and Ka Hei Mak (khmakac@connect.ust.hk)
