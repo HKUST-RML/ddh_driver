@@ -29,12 +29,50 @@
 
 
 
-# Calibration
+# Getting Started
 
+First you need to assemble and calibrate the grippr following the instruction in [ddh_hardware]().
 
-
-
+See  `examples/hello-world.ipynb` for a simple example.
 
 
 
 # API
+
+```python
+from from pyddh import DDGripper
+```
+
+Connect to the gripper using `config/ddh_default.yaml`.
+
+```python
+gripper = DDGripper('ddh_default')
+```
+
+Arm and disarm the gripper.
+
+```python
+gripper.arm(gain=250,BW=500)  # gain and bandwidth optional
+gripper.disarm()
+```
+
+Control individual actuator, the same applies to `R0`, `R1`, `L0`, `L1`
+
+```python
+gripper.R0.armed = False
+gripper.R0.armed = True
+gripper.R0.bandwidth = 500
+gripper.R0.stiffness = 250
+
+# Read and write the linkage angle theta, unit is degrees
+print(gripper.R0.theta)
+gripper.R0.theta = 45
+
+# Read and write the motor position, unit is degrees
+print(gripper.R0.motor_pos)
+gripper.motor_pos = 0
+
+# Read the raw encoder raeding
+print(gripper.R0.encoder)
+```
+
