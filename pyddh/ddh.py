@@ -90,21 +90,47 @@ class DDGripper(object):
         for actuator in self.actuators:
             actuator.bandwidth = BW
 
+    # alpha1-alpha2 parameterization
+
+    def set_right_a1_a2(self, a1, a2):
+        self.R0.theta = a1-a2
+        self.R1.theta = a1+a2
+
+    def set_left_a1_a2(self, a1, a2):
+        self.L0.theta = a1+a2
+        self.L1.theta = a1-a2
+
     @property
     def right_a1(self):
         return (self.R0.theta+self.R1.theta)/2
+
+    @right_a1.setter
+    def right_a1(self, a1):
+        self.set_right_a1_a2(a1, self.right_a2)
 
     @property
     def right_a2(self):
         return (self.R1.theta-self.R0.theta)/2
 
+    @right_a2.setter
+    def right_a2(self, a2):
+        self.set_right_a1_a2(self.right_a1, a2)
+
     @property
     def left_a1(self):
         return (self.L0.theta+self.L1.theta)/2
 
+    @left_a1.setter
+    def left_a1(self, a1):
+        self.set_left_a1_a2(a1, self.left_a2)
+
     @property
     def left_a2(self):
         return (self.L0.theta-self.L1.theta)/2
+
+    @left_a2.setter
+    def left_a2(self, a2):
+        self.set_left_a1_a2(self.left_a1, a2)
 
     # r: distance from motor joint to distal joint (base joint of finger)
 
@@ -167,28 +193,6 @@ class DDGripper(object):
         x = self.right_finger_pos[0] + self.geometry_l3 * np.cos(deg2rad(q_tip))
         y = self.right_finger_pos[1] + self.geometry_l3 * np.sin(deg2rad(q_tip))
         return x, y
-
-    # then control the finger (a1,a2)
-
-    def set_right_a1(self, a1):
-        self.set_right_a1_a2(a1, self.right_a2)
-
-    def set_right_a2(self, a2):
-        self.set_right_a1_a2(self.right_a1, a2)
-
-    def set_right_a1_a2(self, a1, a2):
-        self.R0.theta = a1-a2
-        self.R1.theta = a1+a2
-
-    def set_left_a1(self, a1):
-        self.set_left_a1_a2(a1, self.left_a2)
-
-    def set_left_a2(self, a2):
-        self.set_left_a1_a2(self.left_a1, a2)
-
-    def set_left_a1_a2(self, a1, a2):
-        self.L0.theta = a1+a2
-        self.L1.theta = a1-a2
 
     # then add inverse kinematics
 
