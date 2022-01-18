@@ -13,10 +13,10 @@ class DDGripper(object):
 
     def __init__(self, config_name):
         config_path = os.path.join(os.path.dirname(__file__), '..', 'config', config_name + '.yaml')
-        print('load config %s' % os.path.abspath(config_path))
+        print('Load configuration at %s' % os.path.abspath(config_path))
         with open(config_path, 'r') as stream:
             try:
-                print('reading gripper config...')
+                print('Reading configuration file...')
                 config = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
                 print(exc)
@@ -50,16 +50,16 @@ class DDGripper(object):
         self.r_min = np.sqrt(self.geometry_l1**2 - self.geometry_l2**2) + self.r_min_offset
         self.r_max = self.geometry_l1 + self.geometry_l2 - self.r_max_offset
 
-        print('connecting to odrive...')
-        self.finger_L = odrive.find_any(serial_number=self.odrive_serial_L)
-        print('found left finger')
-        self.finger_R = odrive.find_any(serial_number=self.odrive_serial_R)
-        print('found right finger')
+        print('Connecting to Odrive(s)...')
+        self.odrive_L = odrive.find_any(serial_number=self.odrive_serial_L)
+        print('Found Odrive_L')
+        self.odrive_R = odrive.find_any(serial_number=self.odrive_serial_R)
+        print('Found Odrive_R')
 
-        self.R0 = Actuator(self.finger_R.axis0, self.R0_offset, self.R0_dir, self.R0_link)
-        self.R1 = Actuator(self.finger_R.axis1, self.R1_offset, self.R1_dir, self.R1_link)
-        self.L0 = Actuator(self.finger_L.axis0, self.L0_offset, self.L0_dir, self.L0_link)
-        self.L1 = Actuator(self.finger_L.axis1, self.L1_offset, self.L1_dir, self.L1_link)
+        self.R0 = Actuator(self.odrive_R.axis0, self.R0_offset, self.R0_dir, self.R0_link)
+        self.R1 = Actuator(self.odrive_R.axis1, self.R1_offset, self.R1_dir, self.R1_link)
+        self.L0 = Actuator(self.odrive_L.axis0, self.L0_offset, self.L0_dir, self.L0_link)
+        self.L1 = Actuator(self.odrive_L.axis1, self.L1_offset, self.L1_dir, self.L1_link)
 
     @property
     def actuators(self):
