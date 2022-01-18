@@ -66,19 +66,19 @@ class DDGripper(object):
         return [self.R0, self.R1, self.L0, self.L1]
 
     def arm(self, gain=250, BW=500):
-        for actuator in [self.R0, self.R1, self.L0, self.L1]:
+        for actuator in self.actuators:
             actuator.bandwidth = BW
             actuator.stiffness = gain
             actuator.armed = True
 
     def disarm(self):
-        for actuator in [self.R0, self.R1, self.L0, self.L1]:
+        for actuator in self.actuators:
             actuator.armed = False
 
     def set_stiffness(self, gain, finger='LR'):
         selected_actuators = []
         if finger == 'LR':
-            selected_actuators = [self.R0, self.R1, self.L0, self.L1]
+            selected_actuators = self.actuators
         elif finger == 'L':
             selected_actuators = [self.L0, self.L1]
         elif finger == 'R':
@@ -87,7 +87,7 @@ class DDGripper(object):
             actuator.stiffness = gain
 
     def set_bandwidth(self, BW):
-        for actuator in [self.R0, self.R1, self.L0, self.L1]:
+        for actuator in self.actuators:
             actuator.bandwidth = BW
 
     @property
