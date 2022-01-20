@@ -12,7 +12,7 @@
    git clone git@github.com:HKUST-RML/pyddh.git
    ```
 
-2. Install depenencies
+2. Install dependencies
 
    ```shell
    cd pyddh
