@@ -40,6 +40,8 @@ After assembling the direct-drive gripper by following the instructions in [ddh_
 from pyddh import DDGripper
 ```
 
+*Here, you are not quite addressing APIs. Instead, the contents here can be added to hello-world.ipynb. By doing so, you can enrich hello-world.ipynb, which currently lacks details. Also add more detailed comments to hello-world.ipynb*
+
 Connect to the gripper using `config/ddh_default.yaml`.
 
 ```python
