@@ -1,6 +1,6 @@
 # `pyddh`
 
-`pyddh` is the python dirver and software utilities for our in-house direct-drive hand.
+`pyddh` *Rename to ddh-software* is our driver software that provides a user interface to our direct-drive hand.
 
 
 
