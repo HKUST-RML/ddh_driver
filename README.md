@@ -1,6 +1,6 @@
-# `pyddh`
+# Direct-Drive Hand (Software)
 
-`pyddh` *Rename to ddh-software* is our driver software that provides a user interface to our direct-drive hand.
+The repository contains the driver and user interface to our [direct-drive hand](https://github.com/HKUST-RML/ddh_hardware).
 
 
 
@@ -9,21 +9,21 @@
 1. Clone the repository
 
    ```shell
-   git clone git@github.com:HKUST-RML/pyddh.git
+   git clone https://github.com/HKUST-RML/ddh_software
    ```
 
 2. Install dependencies
 
    ```shell
-   cd pyddh
+   cd ddh_software
    pip3 install -r requirements.txt
    ```
 
-3. Add `pyddh` to `PYTHONPATH`. If you are using Jupyter, the simpliest way is to add the following lines at the begining of the notebook.
+3. Add `ddh_software` to `PYTHONPATH`. If you are using Jupyter, the simpliest way is to add the following lines at the begining of the notebook.
 
    ```python
    import sys
-   sys.path.append('path to pyddh')
+   sys.path.append('path to ddh_software')
    import pyddh
    ```
 
@@ -32,6 +32,8 @@
 # Getting Started
 
 After assembling the direct-drive gripper by following the instructions in [ddh_hardware](https://github.com/HKUST-RML/ddh_hardware), run [hello-world.ipynb](https://github.com/HKUST-RML/pyddh/blob/master/examples/hello-world.ipynb) for a simple example.
+
+
 
 
 # API
