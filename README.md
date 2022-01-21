@@ -35,6 +35,38 @@ After assembling the direct-drive gripper by following the instructions in [ddh_
 
 
 
+# Dev Tools
+
+
+
+## Real-time Visualization Tool
+
+1. Install PlotJuggler
+
+   ```shell
+   snap install plotjuggler
+   ```
+
+2. Install dependencies
+
+   ```shell
+   conda install -c conda-forge liblsl
+   ```
+
+3. Enable `data_streamer` in your code
+
+   ```python
+   from pyddh.lsl_streamer import LslStreamer
+   streamer = LslStreamer(gripper_object)
+   streamer.enabled = True
+   ```
+
+4. Launch `PlotJuggler` App and subscribe to the `ddh` channel
+
+
+
+
+
 
 # API
 
