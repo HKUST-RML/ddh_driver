@@ -12,3 +12,8 @@ def load_ddh_config(name):
         except yaml.YAMLError as exc:
             print(exc)
     return config
+
+
+def get_abs_path(local_path):
+    p = os.path.join(os.path.dirname(__file__), '..', local_path)
+    return os.path.abspath(p)
