@@ -3,23 +3,15 @@ import time
 import numpy as np
 from numpy import deg2rad, rad2deg
 import odrive
-from odrive.enums import *
-import yaml
 import dpath.util as dpath
 from .actuator import Actuator
+from .utils import *
 
 
 class DDGripper(object):
 
     def __init__(self, config_name):
-        config_path = os.path.join(os.path.dirname(__file__), '..', 'config', config_name + '.yaml')
-        print('Load configuration at %s' % os.path.abspath(config_path))
-        with open(config_path, 'r') as stream:
-            try:
-                print('Reading configuration file...')
-                config = yaml.safe_load(stream)
-            except yaml.YAMLError as exc:
-                print(exc)
+        config = load_ddh_config(config_name)
         self.odrive_serial_R = dpath.get(config, 'odrive_serial/R')
         self.odrive_serial_L = dpath.get(config, 'odrive_serial/L')
         self.R0_offset = dpath.get(config, 'motors/R0/offset')

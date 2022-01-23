@@ -2,7 +2,7 @@ import time
 from .ddh import DDGripper
 
 if __name__ == '__main__':
-    gripper = DDGripper('ddh_default')
+    gripper = DDGripper('default')
     print('------------------------------')
     print('Press ENTER to take a snapshot')
     print('------------------------------')
