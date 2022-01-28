@@ -31,7 +31,7 @@ class Actuator(object):
 
     @property
     def armed(self):
-        return self.axis.requested_state is AXIS_STATE_CLOSED_LOOP_CONTROL
+        return self.axis.current_state is AXIS_STATE_CLOSED_LOOP_CONTROL
 
     @armed.setter
     def armed(self, val):
