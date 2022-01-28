@@ -8,7 +8,7 @@ from .actuator import Actuator
 from .utils import *
 
 
-class DDGripper(object):
+class Gripper(object):
 
     def __init__(self, config_name):
         config = load_ddh_config(config_name)

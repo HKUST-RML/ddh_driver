@@ -1,1 +1,1 @@
-from .ddh import DDGripper
+from .gripper import Gripper

@@ -1,8 +1,8 @@
 import time
-from .ddh import DDGripper
+from .gripper import Gripper
 
 if __name__ == '__main__':
-    gripper = DDGripper('default')
+    gripper = Gripper('default')
     print('------------------------------')
     print('Press ENTER to take a snapshot')
     print('------------------------------')
