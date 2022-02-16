@@ -29,15 +29,18 @@ def init_odrive(sn):
 
 
 def calib_axis(axis):
-    axis.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
-    while axis.requested_state is AXIS_STATE_FULL_CALIBRATION_SEQUENCE or axis.current_state > AXIS_STATE_IDLE:
-        time.sleep(0.1)
-        print('Calibrating...', end="\r")
-    axis.requested_state = AXIS_STATE_ENCODER_OFFSET_CALIBRATION
-    while axis.requested_state is AXIS_STATE_FULL_CALIBRATION_SEQUENCE or axis.current_state > AXIS_STATE_IDLE:
-        time.sleep(0.1)
-        print('Calibrating...', end="\r")
-    print('Done 1/4')
+    if not axis.motor.config.pre_calibrated:
+        axis.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
+        while axis.requested_state is AXIS_STATE_FULL_CALIBRATION_SEQUENCE or axis.current_state > AXIS_STATE_IDLE:
+            time.sleep(0.1)
+            print('Calibrating...', end="\r")
+        axis.requested_state = AXIS_STATE_ENCODER_OFFSET_CALIBRATION
+        while axis.requested_state is AXIS_STATE_FULL_CALIBRATION_SEQUENCE or axis.current_state > AXIS_STATE_IDLE:
+            time.sleep(0.1)
+            print('Calibrating...', end="\r")
+        if axis.motor.is_calibrated and axis.encoder.is_ready:
+            axis.motor.config.pre_calibrated = True
+            axis.encoder.config.pre_calibrated = True
 
 
 def calib_motors(sn):
@@ -67,7 +70,7 @@ if __name__ == '__main__':
     SN_R = dpath.get(config, 'odrive_serial/R')
     SN_L = dpath.get(config, 'odrive_serial/L')
     #init_odrive(SN_R)
-    calib_motors(SN_R)
+    #calib_motors(SN_R)
     #arm_motors(SN_R)
 
 
