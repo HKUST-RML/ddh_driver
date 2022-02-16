@@ -28,8 +28,9 @@ def init_odrive(sn):
         print('ODrive rebooted!')
 
 
-def calib_axis(axis):
+def calib_axis(axis, od_name, ax_name):
     if not axis.motor.config.pre_calibrated:
+        print('Axis %s%s not pre_calibrated' % (od_name, ax_name))
         axis.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
         while axis.requested_state is AXIS_STATE_FULL_CALIBRATION_SEQUENCE or axis.current_state > AXIS_STATE_IDLE:
             time.sleep(0.1)
@@ -41,22 +42,26 @@ def calib_axis(axis):
         if axis.motor.is_calibrated and axis.encoder.is_ready:
             axis.motor.config.pre_calibrated = True
             axis.encoder.config.pre_calibrated = True
+    else:
+        print('Axis %s%s pre_calibrated' % (od_name, ax_name))
 
 
-def calib_motors(sn):
+def calib_odrive(sn, od_name):
     od = odrive.find_any(serial_number=sn)
-    calib_axis(od.axis0)
-    calib_axis(od.axis1)
+    calib_axis(od.axis0, od_name, '0')
+    calib_axis(od.axis1, od_name, '1')
     od.save_configuration()
     try:
         od.reboot()
     except fibre.ObjectLostError:
         print('ODrive rebooted!')
 
+
 def arm_motors(sn):
     od = odrive.find_any(serial_number=sn)
     od.axis0.requested_state = AXIS_STATE_CLOSED_LOOP_CONTROL
     od.axis1.requested_state = AXIS_STATE_CLOSED_LOOP_CONTROL
+
 
 def print_encoder_reading(sn):
     od = odrive.find_any(serial_number=sn)
@@ -70,8 +75,8 @@ if __name__ == '__main__':
     SN_R = dpath.get(config, 'odrive_serial/R')
     SN_L = dpath.get(config, 'odrive_serial/L')
     #init_odrive(SN_R)
-    #calib_motors(SN_R)
-    #arm_motors(SN_R)
+    #calib_odrive(SN_R, 'R')
+    arm_motors(SN_R)
 
 
     # odrive_R.axis0.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
