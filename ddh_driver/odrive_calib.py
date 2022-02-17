@@ -30,14 +30,14 @@ def init_odrive(sn):
 
 def ask_for_reboot(sn):
     od = odrive.find_any(serial_number=sn)
-    print('Power off ODrive completely, make sure the green lights on the ODrive boards are off too.')
+    print('YOUR ACTION REQUIRED: Power off ODrive completely, make sure the green lights on the ODrive boards are off too.')
     try:
         while od.axis0.current_state >= 0:
             time.sleep(0.1)
     except Exception as e:
         print('Lost connection, do not power back on yet, wait a few more seconds...')
     time.sleep(3)
-    print('Now power back on!')
+    print('YOUR ACTION REQUIRED: Now power back on!')
     od = odrive.find_any(serial_number=sn)
     print('Reconnected!')
 
@@ -73,8 +73,12 @@ def calib_odrive(sn, od_name):
 
 def arm_motors(sn):
     od = odrive.find_any(serial_number=sn)
+    print('Warming Up')
+    time.sleep(3)
+    print('Arm Motors')
     od.axis0.requested_state = AXIS_STATE_CLOSED_LOOP_CONTROL
     od.axis1.requested_state = AXIS_STATE_CLOSED_LOOP_CONTROL
+    print('The motors should be stiff')
 
 
 def print_encoder_reading(sn):
@@ -84,17 +88,19 @@ def print_encoder_reading(sn):
         print(od.axis0.encoder)
 
 
+def calib_one_board(sn, name):
+    init_odrive(sn)
+    ask_for_reboot(sn)
+    calib_odrive(sn, name)
+    ask_for_reboot(sn)
+    arm_motors(sn)
+
+
 if __name__ == '__main__':
     config = load_ddh_config('default')
     SN_R = dpath.get(config, 'odrive_serial/R')
     SN_L = dpath.get(config, 'odrive_serial/L')
-    ask_for_reboot(SN_R)
-    #init_odrive(SN_R)
-    #calib_odrive(SN_R, 'R')
-    #arm_motors(SN_R)
-
-    # odrive_R.axis0.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
-    # while odrive_R.axis0.current_state > AXIS_STATE_IDLE or odrive_R.axis0.requested_state == AXIS_STATE_FULL_CALIBRATION_SEQUENCE:
-    #      time.sleep(0.1)
-    # print('stoppped')
-    # print(odrive_R.axis0.error)
+    calib_one_board(SN_R, 'R')
+    calib_one_board(SN_L, 'L')
+    print('Calibration Complete!')
+    
