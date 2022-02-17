@@ -30,14 +30,14 @@ def reset_odrive_config(sn):
 
 def ask_for_reboot(sn):
     od = odrive.find_any(serial_number=sn)
-    print('YOUR ACTION REQUIRED: Power off ODrive completely, make sure the green lights on the ODrive boards are off too.')
+    print('\033[93mYOUR ACTION REQUIRED: Power off ODrive completely, make sure the green lights on the ODrive boards are off too.\033[0m')
     try:
         while od.axis0.current_state >= 0:
             time.sleep(0.1)
     except Exception as e:
         print('Lost connection, do not power back on yet, wait a few more seconds...')
     time.sleep(3)
-    print('YOUR ACTION REQUIRED: Now power back on!')
+    print('\033[93mYOUR ACTION REQUIRED: Now power back on!\033[0m')
     od = odrive.find_any(serial_number=sn)
     print('Reconnected!')
 
@@ -54,7 +54,7 @@ def calibrate_axis(axis, od_name, ax_name):
             time.sleep(0.1)
             print('Calibrating...', end="\r")
         if axis.motor.is_calibrated and axis.encoder.is_ready:
-            print('Axis %s%s calibrated' % (od_name, ax_name))
+            print('\033[92mAxis %s%s calibrated\033[0m' % (od_name, ax_name))
             axis.motor.config.pre_calibrated = True
             axis.encoder.config.pre_calibrated = True
     else:
@@ -66,6 +66,7 @@ def calibrate_motors(sn, od_name):
     calibrate_axis(od.axis0, od_name, '0')
     calibrate_axis(od.axis1, od_name, '1')
     od.save_configuration()
+    print('\033[92mODrive_%s calibration saved!\033[0m' % od_name)
     try:
         od.reboot()
     except fibre.ObjectLostError:
@@ -92,7 +93,7 @@ def print_encoder_reading(sn):
 def need_calibration(sn, name):
     od = odrive.find_any(serial_number=sn)
     if od.axis0.motor.config.pre_calibrated and od.axis1.motor.config.pre_calibrated and od.axis0.encoder.config.pre_calibrated and od.axis1.encoder.config.pre_calibrated:
-        ans = input('ODrive_%s seems already calibrated, calibrate anyway? (y/n)' % name)
+        ans = input('\033[93mODrive_%s seems already calibrated, calibrate anyway? (y/n)\033[0m' % name)
         return len(ans) == 0 or ans == 'y' or ans == 'Y'
     else:
         return True
