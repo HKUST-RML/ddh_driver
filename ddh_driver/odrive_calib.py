@@ -10,7 +10,7 @@ from ddh_driver.utils import *
 logger = fibre.Logger(verbose=False)
 
 
-def init_odrive(sn):
+def reset_odrive_config(sn):
     od = odrive.find_any(serial_number=sn)
     try:
         od.erase_configuration()
@@ -42,7 +42,7 @@ def ask_for_reboot(sn):
     print('Reconnected!')
 
 
-def calib_axis(axis, od_name, ax_name):
+def calibrate_axis(axis, od_name, ax_name):
     if not axis.motor.config.pre_calibrated:
         print('Axis %s%s not pre_calibrated' % (od_name, ax_name))
         axis.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
@@ -60,10 +60,10 @@ def calib_axis(axis, od_name, ax_name):
         print('Axis %s%s pre_calibrated' % (od_name, ax_name))
 
 
-def calib_odrive(sn, od_name):
+def calibrate_motors(sn, od_name):
     od = odrive.find_any(serial_number=sn)
-    calib_axis(od.axis0, od_name, '0')
-    calib_axis(od.axis1, od_name, '1')
+    calibrate_axis(od.axis0, od_name, '0')
+    calibrate_axis(od.axis1, od_name, '1')
     od.save_configuration()
     try:
         od.reboot()
@@ -88,10 +88,10 @@ def print_encoder_reading(sn):
         print(od.axis0.encoder)
 
 
-def calib_one_board(sn, name):
-    init_odrive(sn)
+def calibrate_odrive(sn, name):
+    reset_odrive_config(sn)
     ask_for_reboot(sn)
-    calib_odrive(sn, name)
+    calibrate_motors(sn, name)
     ask_for_reboot(sn)
     arm_motors(sn)
 
@@ -100,7 +100,6 @@ if __name__ == '__main__':
     config = load_ddh_config('default')
     SN_R = dpath.get(config, 'odrive_serial/R')
     SN_L = dpath.get(config, 'odrive_serial/L')
-    calib_one_board(SN_R, 'R')
-    calib_one_board(SN_L, 'L')
-    print('Calibration Complete!')
-    
+    calibrate_odrive(SN_R, 'R')
+    calibrate_odrive(SN_L, 'L')
+    print('ODrive Calibration Complete!')
