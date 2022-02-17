@@ -54,6 +54,7 @@ def calibrate_axis(axis, od_name, ax_name):
             time.sleep(0.1)
             print('Calibrating...', end="\r")
         if axis.motor.is_calibrated and axis.encoder.is_ready:
+            print('Axis %s%s calibrated' % (od_name, ax_name))
             axis.motor.config.pre_calibrated = True
             axis.encoder.config.pre_calibrated = True
     else:
@@ -88,12 +89,24 @@ def print_encoder_reading(sn):
         print(od.axis0.encoder)
 
 
+def need_calibration(sn, name):
+    od = odrive.find_any(serial_number=sn)
+    if od.axis0.motor.config.pre_calibrated and od.axis1.motor.config.pre_calibrated and od.axis0.encoder.config.pre_calibrated and od.axis1.encoder.config.pre_calibrated:
+        ans = input('ODrive_%s seems already calibrated, calibrate anyway? (y/n)' % name)
+        return len(ans) == 0 or ans == 'y' or ans == 'Y'
+    else:
+        return True
+
+
 def calibrate_odrive(sn, name):
-    reset_odrive_config(sn)
-    ask_for_reboot(sn)
-    calibrate_motors(sn, name)
-    ask_for_reboot(sn)
-    arm_motors(sn)
+    if need_calibration(sn, name):
+        reset_odrive_config(sn)
+        ask_for_reboot(sn)
+        calibrate_motors(sn, name)
+        ask_for_reboot(sn)
+        arm_motors(sn)
+    else:
+        print('Calibration Skipped')
 
 
 if __name__ == '__main__':
