@@ -28,6 +28,20 @@ def init_odrive(sn):
         print('ODrive rebooted!')
 
 
+def ask_for_reboot(sn):
+    od = odrive.find_any(serial_number=sn)
+    print('Power off ODrive completely, make sure the green lights on the ODrive boards are off too.')
+    try:
+        while od.axis0.current_state >= 0:
+            time.sleep(0.1)
+    except Exception as e:
+        print('Lost connection, do not power back on yet, wait a few more seconds...')
+    time.sleep(3)
+    print('Now power back on!')
+    od = odrive.find_any(serial_number=sn)
+    print('Reconnected!')
+
+
 def calib_axis(axis, od_name, ax_name):
     if not axis.motor.config.pre_calibrated:
         print('Axis %s%s not pre_calibrated' % (od_name, ax_name))
@@ -74,10 +88,10 @@ if __name__ == '__main__':
     config = load_ddh_config('default')
     SN_R = dpath.get(config, 'odrive_serial/R')
     SN_L = dpath.get(config, 'odrive_serial/L')
+    ask_for_reboot(SN_R)
     #init_odrive(SN_R)
     #calib_odrive(SN_R, 'R')
-    arm_motors(SN_R)
-
+    #arm_motors(SN_R)
 
     # odrive_R.axis0.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
     # while odrive_R.axis0.current_state > AXIS_STATE_IDLE or odrive_R.axis0.requested_state == AXIS_STATE_FULL_CALIBRATION_SEQUENCE:
