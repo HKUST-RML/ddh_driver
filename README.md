@@ -1,4 +1,4 @@
-# Direct-Drive Hand (Software)
+# Direct-Drive Hand Driver
 
 The repository contains the driver and user interface to our [direct-drive hand](https://github.com/HKUST-RML/ddh_hardware).
 
@@ -35,11 +35,51 @@ After assembling the direct-drive gripper by following the instructions in [ddh_
 
 
 
-# Developer Tools
+# Utilities
 
 
 
-## Real-time Visualization Tool
+### Calibrate ODrive
+
+```shell
+python3 -m ddh_driver.odrive_calib
+```
+
+This command is only used during hardware assembly, please check the [ddh_hardware](https://github.com/HKUST-RML/ddh_hardware) page for its usage.
+
+
+
+### Check Raw Encoder Readings
+
+```shell
+python3 -m ddh_driver.check_encoder
+```
+
+This command will print the raw real-time readings from the 4 encoders. Unit is revolution, 1.0 means rotated 360 degrees.
+
+
+
+### Check Rotor Positions
+
+```shell
+python3 -m ddh_driver.check_motor_pos
+```
+
+This command will print the rotational position of the four actuators. Unit is degrees. It requires calibrating the zero position of the motors. Please refer to the  [ddh_hardware](https://github.com/HKUST-RML/ddh_hardware) page for more details.
+
+
+
+### Check Proximal Link Positions
+
+```shell
+python3 -m ddh_driver.check_theta
+```
+
+This command will print the rotational position of the four proximal links. Unit is degrees.
+
+
+
+### Real-time Data Visualization via PlotJuggler
 
 1. Install PlotJuggler
 
