@@ -9,7 +9,7 @@ The repository contains the driver and user interface to our [direct-drive hand]
 1. Clone the repository
 
    ```shell
-   git clone https://github.com/HKUST-RML/ddh_software
+   git clone https://github.com/HKUST-RML/ddh_driver
    ```
 
 2. Install dependencies
