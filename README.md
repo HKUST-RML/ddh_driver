@@ -24,7 +24,7 @@ The repository contains the driver and user interface to our [direct-drive hand]
    ```python
    import sys
    sys.path.append('path to ddh_driver')
-   import pyddh
+   import ddh_driver
    ```
 
 
