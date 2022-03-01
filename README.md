@@ -19,7 +19,7 @@ The repository contains the driver and user interface to our [direct-drive hand]
    pip3 install -r requirements.txt
    ```
 
-3. Add `ddh_software` to `PYTHONPATH`. If you are using Jupyter, the simplest way is to add the following lines at the beginning of the notebook.
+3. Add `ddh_driver` to `PYTHONPATH`. If you are using Jupyter, the simplest way is to add the following lines at the beginning of the notebook.
 
    ```python
    import sys
