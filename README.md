@@ -15,7 +15,7 @@ The repository contains the driver and user interface to our [direct-drive hand]
 2. Install dependencies
 
    ```shell
-   cd ddh_software
+   cd ddh_driver
    pip3 install -r requirements.txt
    ```
 
