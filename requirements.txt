@@ -3,3 +3,5 @@ numpy
 PyYAML
 odrive
 pylsl
+PyQt5
+pyqtgraph
