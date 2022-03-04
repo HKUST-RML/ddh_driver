@@ -7,13 +7,13 @@ from PyQt5.QtCore import QSize
 import pyqtgraph as pg
 import numpy as np
 import sys
-from ddh_driver import Gripper
+import ddh_driver
 
 
 class DDHModel:
 
     def __init__(self):
-        self.gripper = Gripper('default')
+        self.gripper = ddh_driver.Gripper('default')
 
 
 class ActuatorsPanelController:
@@ -50,10 +50,12 @@ class ActuatorController:
 
 class PlotPanelController:
 
-    def __init__(self, model):
+    def __init__(self, model: DDHModel):
         self.model = model
-        self.r0_plot = StateSetpointPlotController()
-        self.r1_plot = StateSetpointPlotController()
+        self.r0_plot = StateSetpointPlotController(model.gripper.R0)
+        self.r1_plot = StateSetpointPlotController(model.gripper.R1)
+        self.l0_plot = StateSetpointPlotController(model.gripper.L0)
+        self.l1_plot = StateSetpointPlotController(model.gripper.L1)
         self.setup_view()
 
     def setup_view(self):
@@ -61,13 +63,17 @@ class PlotPanelController:
         self.view.setLayout(QVBoxLayout())
         self.view.layout().addWidget(self.r0_plot.view)
         self.view.layout().addWidget(self.r1_plot.view)
+        self.view.layout().addWidget(self.l0_plot.view)
+        self.view.layout().addWidget(self.l1_plot.view)
 
 
 class StateSetpointPlotController:
-    def __init__(self):
+    def __init__(self, model: ddh_driver.Actuator):
+        self.model = model
         self.t0 = time.perf_counter()
-        self.vx = []
-        self.vy = []
+        self.vt = []
+        self.v_state = []
+        self.v_setpoint = []
         self.setup_view()
         self.update_timer = QtCore.QTimer()
         self.update_timer.timeout.connect(self.update_plot)
@@ -75,13 +81,16 @@ class StateSetpointPlotController:
 
     def setup_view(self):
         self.view = pg.PlotWidget(name='Plot')
-        self.line = self.view.plot()
+        self.line_setpoint = self.view.plot()
+        self.line_state = self.view.plot()
 
     def update_plot(self):
         dt = time.perf_counter() - self.t0
-        self.vx.append(dt)
-        self.vy.append(math.sin(dt))
-        self.line.setData(x=self.vx, y=self.vy)
+        self.vt.append(dt)
+        self.v_state.append(math.cos(dt))
+        self.v_setpoint.append(math.sin(dt))
+        self.line_state.setData(x=self.vt, y=self.v_state)
+        self.line_setpoint.setData(x=self.vt, y=self.v_setpoint)
 
 
 class InteractPanelController:
@@ -105,7 +114,7 @@ class ControlPanelController:
 
     def init_view(self):
         self.view.setWindowTitle('Direct-Drive Hand Control Panel')
-        self.view.setFixedSize(QSize(800, 600))
+        self.view.setMinimumSize(QSize(800, 600))
         self.view.setLayout(QHBoxLayout())
         self.view.layout().addWidget(self.actuators_panel.view)
         self.view.layout().addWidget(self.plot_panel.view)
