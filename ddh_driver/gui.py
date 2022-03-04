@@ -14,7 +14,11 @@ class DDHModel:
 
     def __init__(self):
         self.gripper = ddh_driver.Gripper('default')
-
+        self.gripper.arm()
+        self.gripper.left_a1 = 0
+        self.gripper.left_a2 = 20
+        self.gripper.right_a1 = 0
+        self.gripper.right_a2 = 20
 
 class ActuatorsPanelController:
 
@@ -71,9 +75,10 @@ class StateSetpointPlotController:
     def __init__(self, model: ddh_driver.Actuator):
         self.model = model
         self.t0 = time.perf_counter()
-        self.vt = []
-        self.v_state = []
-        self.v_setpoint = []
+        self.state_vt = []
+        self.state_v = []
+        self.sp_vt = []
+        self.sp_v = []
         self.setup_view()
         self.update_timer = QtCore.QTimer()
         self.update_timer.timeout.connect(self.update_plot)
@@ -81,16 +86,20 @@ class StateSetpointPlotController:
 
     def setup_view(self):
         self.view = pg.PlotWidget(name='Plot')
-        self.line_setpoint = self.view.plot()
+        self.line_sp = self.view.plot()
         self.line_state = self.view.plot()
+        self.line_state.setPen('r')
+        self.line_sp.setPen('g')
 
     def update_plot(self):
         dt = time.perf_counter() - self.t0
-        self.vt.append(dt)
-        self.v_state.append(math.cos(dt))
-        self.v_setpoint.append(math.sin(dt))
-        self.line_state.setData(x=self.vt, y=self.v_state)
-        self.line_setpoint.setData(x=self.vt, y=self.v_setpoint)
+        self.state_vt.append(dt)
+        self.state_v.append(self.model.theta)
+        if self.model.armed:
+            self.sp_vt.append(dt)
+            self.sp_v.append(self.model.setpoint)
+        self.line_state.setData(x=self.state_vt, y=self.state_v)
+        self.line_sp.setData(x=self.sp_vt, y=self.sp_v)
 
 
 class InteractPanelController:
