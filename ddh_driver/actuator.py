@@ -3,7 +3,8 @@ from odrive.enums import *
 
 class Actuator(object):
 
-    def __init__(self, axis, encoder_offset, direction, link_offset):
+    def __init__(self, name, axis, encoder_offset, direction, link_offset):
+        self.name = name
         self.axis = axis
         self.encoder_offset = encoder_offset
         self.direction = direction

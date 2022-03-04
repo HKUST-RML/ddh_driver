@@ -48,10 +48,10 @@ class Gripper(object):
         self.odrive_R = odrive.find_any(serial_number=self.odrive_serial_R)
         print('Found Odrive_R')
 
-        self.R0 = Actuator(self.odrive_R.axis0, self.R0_offset, self.R0_dir, self.R0_link)
-        self.R1 = Actuator(self.odrive_R.axis1, self.R1_offset, self.R1_dir, self.R1_link)
-        self.L0 = Actuator(self.odrive_L.axis0, self.L0_offset, self.L0_dir, self.L0_link)
-        self.L1 = Actuator(self.odrive_L.axis1, self.L1_offset, self.L1_dir, self.L1_link)
+        self.R0 = Actuator('R0', self.odrive_R.axis0, self.R0_offset, self.R0_dir, self.R0_link)
+        self.R1 = Actuator('R1', self.odrive_R.axis1, self.R1_offset, self.R1_dir, self.R1_link)
+        self.L0 = Actuator('L0', self.odrive_L.axis0, self.L0_offset, self.L0_dir, self.L0_link)
+        self.L1 = Actuator('L1', self.odrive_L.axis1, self.L1_offset, self.L1_dir, self.L1_link)
 
     @property
     def actuators(self):
