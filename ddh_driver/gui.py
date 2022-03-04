@@ -15,10 +15,8 @@ class DDHModel:
     def __init__(self):
         self.gripper = ddh_driver.Gripper('default')
         self.gripper.arm()
-        self.gripper.left_a1 = 0
-        self.gripper.left_a2 = 20
-        self.gripper.right_a1 = 0
-        self.gripper.right_a2 = 20
+        self.gripper.set_left_a1_a2(0, 20)
+        self.gripper.set_right_a1_a2(0, 20)
 
 
 class GripperPanel:
@@ -124,6 +122,9 @@ class StateSetpointPlot:
         if self.model.armed:
             self.sp_vt.append(dt)
             self.sp_v.append(self.model.setpoint)
+        else:
+            self.sp_vt.clear()
+            self.sp_v.clear()
         self.line_state.setData(x=self.state_vt, y=self.state_v)
         self.line_sp.setData(x=self.sp_vt, y=self.sp_v)
 
