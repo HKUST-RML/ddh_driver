@@ -2,7 +2,7 @@ import math
 import time
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QHBoxLayout, QVBoxLayout, QLabel, QPushButton
+from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QGroupBox
 from PyQt5.QtCore import QSize
 import pyqtgraph as pg
 import numpy as np
@@ -26,7 +26,7 @@ class GripperPanel:
         self.setup_view()
 
     def setup_view(self):
-        self.view = QWidget()
+        self.view = QGroupBox('Gripper')
         self.view.setLayout(QVBoxLayout())
         self.btn_arm = QPushButton('Arm')
         self.btn_arm.clicked.connect(self.arm)
@@ -34,6 +34,7 @@ class GripperPanel:
         self.btn_disarm = QPushButton('Disarm')
         self.btn_disarm.clicked.connect(self.disarm)
         self.view.layout().addWidget(self.btn_disarm)
+        self.view.layout().addStretch(1)
 
     def arm(self):
         self.model.arm()
@@ -47,12 +48,13 @@ class ControlPanel:
     def __init__(self, model):
         self.model = model
         self.gripper_controller = GripperPanel(model.gripper)
-        self.R0_controller = ActuatorEntry(model, 'R0')
-        self.R1_controller = ActuatorEntry(model, 'R1')
-        self.L0_controller = ActuatorEntry(model, 'L0')
-        self.L1_controller = ActuatorEntry(model, 'L1')
+        self.R0_controller = ActuatorEntry(model.gripper.R0)
+        self.R1_controller = ActuatorEntry(model.gripper.R1)
+        self.L0_controller = ActuatorEntry(model.gripper.L0)
+        self.L1_controller = ActuatorEntry(model.gripper.L1)
 
         self.view = QWidget()
+        self.view.setMinimumWidth(200)
         self.view.setLayout(QVBoxLayout())
         self.view.layout().addWidget(self.gripper_controller.view)
         self.view.layout().addWidget(self.R0_controller.view)
@@ -63,17 +65,14 @@ class ControlPanel:
 
 class ActuatorEntry:
 
-    def __init__(self, model, name):
+    def __init__(self, model: ddh_driver.Actuator):
         self.model = model
-        self.name = name
         self.setup_view()
 
     def setup_view(self):
-        self.view = QWidget()
+        self.view = QGroupBox(self.model.name)
         self.view.setLayout(QVBoxLayout())
-        self.view_title = QLabel()
-        self.view_title.setText(self.name)
-        self.view.layout().addWidget(self.view_title)
+        self.view.layout().addStretch(1)
 
 
 class PlotPanel:
@@ -109,7 +108,8 @@ class StateSetpointPlot:
         self.update_timer.start(20)
 
     def setup_view(self):
-        self.view = pg.PlotWidget(name='Plot')
+        self.view = pg.PlotWidget()
+        self.view.setTitle(self.model.name)
         self.line_sp = self.view.plot()
         self.line_state = self.view.plot()
         self.line_state.setPen('r')
@@ -159,6 +159,7 @@ class DDHMain:
 
 def main():
     app = QApplication(sys.argv)
+    app.setStyle('Windows')
     control_panel = DDHMain()
     control_panel.view.show()
     app.exec()
