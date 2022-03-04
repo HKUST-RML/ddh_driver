@@ -134,6 +134,7 @@ class InteractPanel:
     def __init__(self, model):
         self.model = model
         self.view = QWidget()
+        self.view.setMinimumWidth(600)
 
 
 class DDHMain:
