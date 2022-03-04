@@ -9,6 +9,15 @@ class Actuator(object):
         self.direction = direction
         self.link_offset = link_offset
 
+    def motor2theta(self, q):
+        return q + self.link_offset
+
+    def encoder2motor(self, q):
+        return 360 * self.direction * (q - self.encoder_offset)
+
+    def encoder2theta(self, q):
+        return self.motor2theta(self.encoder2motor(q))
+
     @property
     def encoder(self):
         return self.axis.encoder.pos_estimate
@@ -22,12 +31,20 @@ class Actuator(object):
         self.axis.controller.input_pos = (setpoint / 360.) * self.direction + self.encoder_offset
 
     @property
+    def setpoint(self):
+        return self.encoder2theta(self.axis.controller.input_pos)
+
+    @setpoint.setter
+    def setpoint(self, val):
+        self.motor_pos = val - self.link_offset
+
+    @property
     def theta(self):
         return self.motor_pos + self.link_offset
 
     @theta.setter
     def theta(self, setpoint):
-        self.motor_pos = setpoint - self.link_offset
+        self.setpoint = setpoint
 
     @property
     def armed(self):
