@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QHBoxLayout, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QHBoxLayout, QVBoxLayout, QLabel
 from PyQt5.QtCore import QSize
 import sys
 from ddh_driver import Gripper
@@ -16,8 +16,32 @@ class ActuatorsPanelController:
 
     def __init__(self, model):
         self.model = model
+        self.R0_controller = ActuatorController(model, 'R0')
+        self.R1_controller = ActuatorController(model, 'R1')
+        self.L0_controller = ActuatorController(model, 'L0')
+        self.L1_controller = ActuatorController(model, 'L1')
+
         self.view = QWidget()
         self.view.setLayout(QVBoxLayout())
+        self.view.layout().addWidget(self.R0_controller.view)
+        self.view.layout().addWidget(self.R1_controller.view)
+        self.view.layout().addWidget(self.L0_controller.view)
+        self.view.layout().addWidget(self.L1_controller.view)
+
+
+class ActuatorController:
+
+    def __init__(self, model, name):
+        self.model = model
+        self.name = name
+        self.setup_view()
+
+    def setup_view(self):
+        self.view = QWidget()
+        self.view.setLayout(QVBoxLayout())
+        self.view_title = QLabel()
+        self.view_title.setText(self.name)
+        self.view.layout().addWidget(self.view_title)
 
 
 class PlotPanelController:
