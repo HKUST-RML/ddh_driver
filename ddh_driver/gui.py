@@ -20,14 +20,15 @@ class DDHModel:
         self.gripper.right_a1 = 0
         self.gripper.right_a2 = 20
 
-class ActuatorsPanelController:
+
+class ActuatorsPanel:
 
     def __init__(self, model):
         self.model = model
-        self.R0_controller = ActuatorController(model, 'R0')
-        self.R1_controller = ActuatorController(model, 'R1')
-        self.L0_controller = ActuatorController(model, 'L0')
-        self.L1_controller = ActuatorController(model, 'L1')
+        self.R0_controller = ActuatorEntry(model, 'R0')
+        self.R1_controller = ActuatorEntry(model, 'R1')
+        self.L0_controller = ActuatorEntry(model, 'L0')
+        self.L1_controller = ActuatorEntry(model, 'L1')
 
         self.view = QWidget()
         self.view.setLayout(QVBoxLayout())
@@ -37,7 +38,7 @@ class ActuatorsPanelController:
         self.view.layout().addWidget(self.L1_controller.view)
 
 
-class ActuatorController:
+class ActuatorEntry:
 
     def __init__(self, model, name):
         self.model = model
@@ -52,14 +53,14 @@ class ActuatorController:
         self.view.layout().addWidget(self.view_title)
 
 
-class PlotPanelController:
+class PlotPanel:
 
     def __init__(self, model: DDHModel):
         self.model = model
-        self.r0_plot = StateSetpointPlotController(model.gripper.R0)
-        self.r1_plot = StateSetpointPlotController(model.gripper.R1)
-        self.l0_plot = StateSetpointPlotController(model.gripper.L0)
-        self.l1_plot = StateSetpointPlotController(model.gripper.L1)
+        self.r0_plot = StateSetpointPlot(model.gripper.R0)
+        self.r1_plot = StateSetpointPlot(model.gripper.R1)
+        self.l0_plot = StateSetpointPlot(model.gripper.L0)
+        self.l1_plot = StateSetpointPlot(model.gripper.L1)
         self.setup_view()
 
     def setup_view(self):
@@ -71,7 +72,7 @@ class PlotPanelController:
         self.view.layout().addWidget(self.l1_plot.view)
 
 
-class StateSetpointPlotController:
+class StateSetpointPlot:
     def __init__(self, model: ddh_driver.Actuator):
         self.model = model
         self.t0 = time.perf_counter()
@@ -102,21 +103,21 @@ class StateSetpointPlotController:
         self.line_sp.setData(x=self.sp_vt, y=self.sp_v)
 
 
-class InteractPanelController:
+class InteractPanel:
 
     def __init__(self, model):
         self.model = model
         self.view = QWidget()
 
 
-class ControlPanelController:
+class ControlPanel:
 
     def __init__(self):
         self.model = DDHModel()
         # setup sub-controllers
-        self.actuators_panel = ActuatorsPanelController(self.model)
-        self.plot_panel = PlotPanelController(self.model)
-        self.interact_panel = InteractPanelController(self.model)
+        self.actuators_panel = ActuatorsPanel(self.model)
+        self.plot_panel = PlotPanel(self.model)
+        self.interact_panel = InteractPanel(self.model)
         # setup view
         self.view = QWidget()
         self.init_view()
@@ -132,7 +133,7 @@ class ControlPanelController:
 
 def main():
     app = QApplication(sys.argv)
-    control_panel = ControlPanelController()
+    control_panel = ControlPanel()
     control_panel.view.show()
     app.exec()
 
