@@ -2,7 +2,7 @@ import math
 import time
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QHBoxLayout, QVBoxLayout, QLabel
+from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QHBoxLayout, QVBoxLayout, QLabel, QPushButton
 from PyQt5.QtCore import QSize
 import pyqtgraph as pg
 import numpy as np
@@ -21,10 +21,34 @@ class DDHModel:
         self.gripper.right_a2 = 20
 
 
-class ActuatorsPanel:
+class GripperPanel:
+
+    def __init__(self, model: ddh_driver.Gripper):
+        self.model = model
+        self.setup_view()
+
+    def setup_view(self):
+        self.view = QWidget()
+        self.view.setLayout(QVBoxLayout())
+        self.btn_arm = QPushButton('Arm')
+        self.btn_arm.clicked.connect(self.arm)
+        self.view.layout().addWidget(self.btn_arm)
+        self.btn_disarm = QPushButton('Disarm')
+        self.btn_disarm.clicked.connect(self.disarm)
+        self.view.layout().addWidget(self.btn_disarm)
+
+    def arm(self):
+        self.model.arm()
+
+    def disarm(self):
+        self.model.disarm()
+
+
+class ControlPanel:
 
     def __init__(self, model):
         self.model = model
+        self.gripper_controller = GripperPanel(model.gripper)
         self.R0_controller = ActuatorEntry(model, 'R0')
         self.R1_controller = ActuatorEntry(model, 'R1')
         self.L0_controller = ActuatorEntry(model, 'L0')
@@ -32,6 +56,7 @@ class ActuatorsPanel:
 
         self.view = QWidget()
         self.view.setLayout(QVBoxLayout())
+        self.view.layout().addWidget(self.gripper_controller.view)
         self.view.layout().addWidget(self.R0_controller.view)
         self.view.layout().addWidget(self.R1_controller.view)
         self.view.layout().addWidget(self.L0_controller.view)
@@ -110,12 +135,12 @@ class InteractPanel:
         self.view = QWidget()
 
 
-class ControlPanel:
+class DDHMain:
 
     def __init__(self):
         self.model = DDHModel()
         # setup sub-controllers
-        self.actuators_panel = ActuatorsPanel(self.model)
+        self.actuators_panel = ControlPanel(self.model)
         self.plot_panel = PlotPanel(self.model)
         self.interact_panel = InteractPanel(self.model)
         # setup view
@@ -133,7 +158,7 @@ class ControlPanel:
 
 def main():
     app = QApplication(sys.argv)
-    control_panel = ControlPanel()
+    control_panel = DDHMain()
     control_panel.view.show()
     app.exec()
 
