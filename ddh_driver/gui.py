@@ -13,8 +13,7 @@ from ddh_driver import Gripper
 class DDHModel:
 
     def __init__(self):
-        pass
-        #self.gripper = Gripper('default')
+        self.gripper = Gripper('default')
 
 
 class ActuatorsPanelController:
@@ -53,8 +52,8 @@ class PlotPanelController:
 
     def __init__(self, model):
         self.model = model
-        self.r0_plot = TimePlotController()
-        self.r1_plot = TimePlotController()
+        self.r0_plot = StateSetpointPlotController()
+        self.r1_plot = StateSetpointPlotController()
         self.setup_view()
 
     def setup_view(self):
@@ -64,7 +63,7 @@ class PlotPanelController:
         self.view.layout().addWidget(self.r1_plot.view)
 
 
-class TimePlotController:
+class StateSetpointPlotController:
     def __init__(self):
         self.t0 = time.perf_counter()
         self.vx = []
@@ -83,7 +82,6 @@ class TimePlotController:
         self.vx.append(dt)
         self.vy.append(math.sin(dt))
         self.line.setData(x=self.vx, y=self.vy)
-
 
 
 class InteractPanelController:
