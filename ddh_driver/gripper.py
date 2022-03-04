@@ -61,10 +61,11 @@ class Gripper(object):
         elif finger == 'R':
             return [self.R0, self.R1]
 
-    def arm(self, gain=250, BW=500, finger='LR'):
+    def arm(self, pos_gain=250, vel_gain = 1, BW=500, finger='LR'):
         for actuator in self.get_actuators(finger):
             actuator.bandwidth = BW
-            actuator.stiffness = gain
+            actuator.stiffness = pos_gain
+            actuator.vel_gain = vel_gain
             actuator.armed = True
 
     def disarm(self, finger='LR'):
@@ -74,6 +75,10 @@ class Gripper(object):
     def set_stiffness(self, gain, finger='LR'):
         for actuator in self.get_actuators(finger):
             actuator.stiffness = gain
+        
+    def set_vel_gain(self, gain, finger='LR'):
+        for actuator in self.get_actuators(finger):
+            actuator.vel_gain = gain
 
     def set_bandwidth(self, BW, finger='LR'):
         for actuator in self.get_actuators(finger):
