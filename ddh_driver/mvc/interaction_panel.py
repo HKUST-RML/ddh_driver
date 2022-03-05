@@ -136,8 +136,8 @@ class InteractionPanel:
         self.view.mouseMoveEvent = self.mouseMoveEvent
         self.view.mouseReleaseEvent = self.on_mouse_release
         self.view.mousePressEvent = self.on_mouse_press
-        self.scale = 3
-        self.center = np.array([self.width/2, self.height/4])  # in ui frame
+        self.scale = 2.5
+        self.center = np.array([self.width/2, self.height/8])  # in ui frame
         self.pen_link = QtGui.QPen()
         self.pen_link.setWidth(5)
         self.pen_link.setColor(clr_link)
