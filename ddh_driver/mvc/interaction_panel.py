@@ -1,7 +1,7 @@
 from enum import IntEnum, Enum
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QGroupBox
-from PyQt5.QtCore import QSize
+from PyQt5.QtCore import QSize, QPointF, QPoint
 from PyQt5.QtGui import QColor, QPalette
 import ddh_driver
 import numpy as np
@@ -15,26 +15,55 @@ class InteractionState(Enum):
     theta_L1 = 4
 
 
-clr_link = QColor('white')
+clr_link = QColor('black')
 clr_joint = clr_link
 clr_joint_highlight = QColor('green')
+clr_background = QColor('white')
 
 
-class GripperModel:
+class KinematicModel:
+
     def __init__(self, gripper: ddh_driver.Gripper):
         self.gripper = gripper
         self.origin = np.array([0, 0])
-        self.left_O = np.array([-self.gripper.geometry_l0/2, 0])
-        self.right_O = np.array([self.gripper.geometry_l0/2, 0])
+        self.pt_O_l = np.array([-self.gripper.geometry_l0/2, 0])
+        self.pt_O_r = np.array([self.gripper.geometry_l0/2, 0])
+
+    @property
+    def pt_r0(self):
+        theta = np.deg2rad(self.gripper.R0.theta)
+        l1 = self.gripper.geometry_l1
+        return l1 * np.array([np.cos(theta), np.sin(theta)]) + self.pt_O_r
+
+    @property
+    def pt_r1(self):
+        theta = np.deg2rad(self.gripper.R1.theta)
+        l1 = self.gripper.geometry_l1
+        return l1 * np.array([np.cos(theta), np.sin(theta)]) + self.pt_O_r
+
+    @property
+    def pt_l0(self):
+        theta = np.deg2rad(self.gripper.L0.theta)
+        l1 = self.gripper.geometry_l1
+        return l1 * np.array([np.cos(theta), np.sin(theta)]) + self.pt_O_l
+
+    @property
+    def pt_l1(self):
+        theta = np.deg2rad(self.gripper.L1.theta)
+        l1 = self.gripper.geometry_l1
+        return l1 * np.array([np.cos(theta), np.sin(theta)]) + self.pt_O_l
 
 
 class InteractionPanel:
 
     def __init__(self, model: ddh_driver.Gripper):
         self.model = model
-        self.kinematics_model = GripperModel(model)
+        self.kinematics_model = KinematicModel(model)
         self.fsm = InteractionState.idle
         self.setup_view()
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.refresh)
+        self.timer.start(30)
 
     def setup_view(self):
         self.view = QLabel()
@@ -48,18 +77,32 @@ class InteractionPanel:
         self.scale = 3
         self.center = np.array([self.width/2, self.height/4])  # in ui frame
 
+    def refresh(self):
+        self.view.pixmap().fill(clr_background)
+        painter = QtGui.QPainter(self.view.pixmap())
+        painter.pen().setColor(QColor('red'))
+        painter.pen().setWidth(5)
+        painter.drawEllipse(self.gripper2ui(self.kinematics_model.pt_r0),10,10)
+        painter.drawEllipse(self.gripper2ui(self.kinematics_model.pt_r1),10,10)
+        painter.drawEllipse(self.gripper2ui(self.kinematics_model.pt_l0),10,10)
+        painter.drawEllipse(self.gripper2ui(self.kinematics_model.pt_l1),10,10)
+        painter.end()
+        self.view.update()
+
     def ui2gripper(self, pt: np.ndarray):
         """
         Convert 2D Point from UI frame to Gripper Frame
         """
-        pt = (pt-self.center) / self.scale
+        pt = (pt - self.center) / self.scale
         return np.array([pt[1], pt[0]])
 
     def gripper2ui(self, pt):
         """
         Convert 2D Point from Gripper Frame to UI Frame
         """
-        return pt
+        pt = pt * self.scale
+        pt = np.array([pt[1], pt[0]]) + self.center
+        return QtCore.QPointF(pt[0], pt[1])
 
     def mouseMoveEvent(self, e: QtGui.QMouseEvent):
         pos = e.localPos()
