@@ -137,14 +137,15 @@ class DDHMain:
         # setup sub-controllers
         self.actuators_panel = ControlPanel(self.model)
         self.plot_panel = PlotPanel(self.model)
-        self.interact_panel = InteractionPanel(self.model)
+        self.interact_panel = InteractionPanel(self.model.gripper)
         # setup view
         self.view = QWidget()
         self.init_view()
 
     def init_view(self):
-        self.view.setWindowTitle('Direct-Drive Hand Control Panel')
+        self.view.setWindowTitle('Direct-Drive Hand - GUI')
         self.view.setMinimumSize(QSize(800, 600))
+        self.view.setFixedHeight(600)
         self.view.setLayout(QHBoxLayout())
         self.view.layout().addWidget(self.actuators_panel.view)
         self.view.layout().addWidget(self.plot_panel.view)

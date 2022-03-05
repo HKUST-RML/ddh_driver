@@ -1,19 +1,75 @@
 from enum import IntEnum, Enum
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QGroupBox
+from PyQt5.QtCore import QSize
+from PyQt5.QtGui import QColor, QPalette
+import ddh_driver
+import numpy as np
+
+
+class InteractionState(Enum):
+    idle = 0
+    theta_R0 = 1
+    theta_R1 = 2
+    theta_L0 = 3
+    theta_L1 = 4
+
+
+clr_link = QColor('white')
+clr_joint = clr_link
+clr_joint_highlight = QColor('green')
+
+
+class GripperModel:
+    def __init__(self, gripper: ddh_driver.Gripper):
+        self.gripper = gripper
+        self.origin = np.array([0, 0])
+        self.left_O = np.array([-self.gripper.geometry_l0/2, 0])
+        self.right_O = np.array([self.gripper.geometry_l0/2, 0])
 
 
 class InteractionPanel:
 
-    class InteractionState(Enum):
-        idle = 0
-        theta_R0 = 1
-        theta_R1 = 2
-        theta_L0 = 3
-        theta_L1 = 4
-
-    def __init__(self, model):
+    def __init__(self, model: ddh_driver.Gripper):
         self.model = model
-        self.view = QWidget()
-        self.view.setMinimumWidth(600)
+        self.kinematics_model = GripperModel(model)
+        self.fsm = InteractionState.idle
+        self.setup_view()
+
+    def setup_view(self):
+        self.view = QLabel()
+        self.width = 600
+        self.height = 600
+        self.canvas = QtGui.QPixmap(self.width, self.height)
+        self.view.setPixmap(self.canvas)
+        self.view.mouseMoveEvent = self.mouseMoveEvent
+        self.view.mouseReleaseEvent = self.on_mouse_release
+        self.view.mousePressEvent = self.on_mouse_press
+        self.scale = 3
+        self.center = np.array([self.width/2, self.height/4])  # in ui frame
+
+    def ui2gripper(self, pt: np.ndarray):
+        """
+        Convert 2D Point from UI frame to Gripper Frame
+        """
+        pt = (pt-self.center) / self.scale
+        return np.array([pt[1], pt[0]])
+
+    def gripper2ui(self, pt):
+        """
+        Convert 2D Point from Gripper Frame to UI Frame
+        """
+        return pt
+
+    def mouseMoveEvent(self, e: QtGui.QMouseEvent):
+        pos = e.localPos()
+        pt = np.array([pos.x(), pos.y()])
+        pt = self.ui2gripper(pt)
+        print(pt)
+
+    def on_mouse_release(self, e):
+        print('released')
+        self.fsm = InteractionState.idle
+
+    def on_mouse_press(self, e):
+        print('pressed')
