@@ -54,33 +54,35 @@ class Gripper(object):
         self.L0 = Actuator('L0', self.odrive_L.axis0, self.L0_offset, self.L0_dir, self.L0_link)
         self.L1 = Actuator('L1', self.odrive_L.axis1, self.L1_offset, self.L1_dir, self.L1_link)
 
-    @property
-    def actuators(self):
-        return [self.R0, self.R1, self.L0, self.L1]
+    def get_actuators(self, finger='LR'):
+        if finger == 'LR':
+            return [self.R0, self.R1, self.L0, self.L1]
+        elif finger == 'L':
+            return [self.L0, self.L1]
+        elif finger == 'R':
+            return [self.R0, self.R1]
 
-    def arm(self, gain=250, BW=500):
-        for actuator in self.actuators:
+    def arm(self, pos_gain=250, vel_gain = 1, BW=500, finger='LR'):
+        for actuator in self.get_actuators(finger):
             actuator.bandwidth = BW
-            actuator.stiffness = gain
+            actuator.stiffness = pos_gain
+            actuator.vel_gain = vel_gain
             actuator.armed = True
 
-    def disarm(self):
-        for actuator in self.actuators:
+    def disarm(self, finger='LR'):
+        for actuator in self.get_actuators(finger):
             actuator.armed = False
 
     def set_stiffness(self, gain, finger='LR'):
-        selected_actuators = []
-        if finger == 'LR':
-            selected_actuators = self.actuators
-        elif finger == 'L':
-            selected_actuators = [self.L0, self.L1]
-        elif finger == 'R':
-            selected_actuators = [self.R0, self.R1]
-        for actuator in selected_actuators:
+        for actuator in self.get_actuators(finger):
             actuator.stiffness = gain
+        
+    def set_vel_gain(self, gain, finger='LR'):
+        for actuator in self.get_actuators(finger):
+            actuator.vel_gain = gain
 
-    def set_bandwidth(self, BW):
-        for actuator in self.actuators:
+    def set_bandwidth(self, BW, finger='LR'):
+        for actuator in self.get_actuators(finger):
             actuator.bandwidth = BW
 
     # alpha1-alpha2 parameterization

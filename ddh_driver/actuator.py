@@ -56,7 +56,6 @@ class Actuator(object):
         if val:  # arm
             self.axis.controller.config.input_mode = INPUT_MODE_POS_FILTER  # INPUT_MODE_PASSTHROUGH
             self.axis.requested_state = AXIS_STATE_CLOSED_LOOP_CONTROL
-            self.axis.controller.config.vel_gain = 1
         else:  # disarm
             self.axis.requested_state = AXIS_STATE_IDLE
 
@@ -67,6 +66,14 @@ class Actuator(object):
     @stiffness.setter
     def stiffness(self, val):
         self.axis.controller.config.pos_gain = val
+
+    @property
+    def vel_gain(self):
+        return self.axis.controller.config.vel_gain
+
+    @vel_gain.setter
+    def vel_gain(self, val):
+        self.axis.controller.config.vel_gain = val
 
     @property
     def bandwidth(self):
