@@ -26,8 +26,8 @@ class KinematicModel:
     def __init__(self, gripper: ddh_driver.Gripper):
         self.gripper = gripper
         self.origin = np.array([0, 0])
-        self.pt_O_l = np.array([-self.gripper.geometry_l0/2, 0])
-        self.pt_O_r = np.array([self.gripper.geometry_l0/2, 0])
+        self.pt_O_l = np.array([0, -self.gripper.geometry_l0/2])
+        self.pt_O_r = np.array([0, self.gripper.geometry_l0/2])
 
     @property
     def pt_r0(self):
@@ -76,16 +76,33 @@ class InteractionPanel:
         self.view.mousePressEvent = self.on_mouse_press
         self.scale = 3
         self.center = np.array([self.width/2, self.height/4])  # in ui frame
+        self.pen_link = QtGui.QPen()
+        self.pen_link.setWidth(5)
+        self.pen_link.setColor(clr_link)
+        self.pen_link.setBrush(clr_link)
 
     def refresh(self):
         self.view.pixmap().fill(clr_background)
         painter = QtGui.QPainter(self.view.pixmap())
-        painter.pen().setColor(QColor('red'))
-        painter.pen().setWidth(5)
-        painter.drawEllipse(self.gripper2ui(self.kinematics_model.pt_r0),10,10)
-        painter.drawEllipse(self.gripper2ui(self.kinematics_model.pt_r1),10,10)
-        painter.drawEllipse(self.gripper2ui(self.kinematics_model.pt_l0),10,10)
-        painter.drawEllipse(self.gripper2ui(self.kinematics_model.pt_l1),10,10)
+        painter.setPen(self.pen_link)
+        # current points in ui frame
+        O_r = self.gripper2ui(self.kinematics_model.pt_O_r)
+        O_l = self.gripper2ui(self.kinematics_model.pt_O_l)
+        pt_r0 = self.gripper2ui(self.kinematics_model.pt_r0)
+        pt_r1 = self.gripper2ui(self.kinematics_model.pt_r1)
+        pt_l0 = self.gripper2ui(self.kinematics_model.pt_l0)
+        pt_l1 = self.gripper2ui(self.kinematics_model.pt_l1)
+        # draw the proximal links
+        painter.drawLine(O_r, pt_r0)
+        painter.drawLine(O_r, pt_r1)
+        painter.drawLine(O_l, pt_l0)
+        painter.drawLine(O_l, pt_l1)
+        # draw joint
+        painter.setBrush(clr_link)
+        painter.drawEllipse(pt_r0, 10, 10)
+        painter.drawEllipse(pt_r1, 10, 10)
+        painter.drawEllipse(pt_l0, 10, 10)
+        painter.drawEllipse(pt_l1, 10, 10)
         painter.end()
         self.view.update()
 
