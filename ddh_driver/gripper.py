@@ -11,7 +11,7 @@ from .utils import *
 class Gripper(object):
 
     def __init__(self, config_name):
-        config = load_ddh_config(config_name)
+        self.config = config = load_ddh_config(config_name)
         self.odrive_serial_R = dpath.get(config, 'odrive_serial/R')
         self.odrive_serial_L = dpath.get(config, 'odrive_serial/L')
         self.R0_offset = dpath.get(config, 'motors/R0/offset')
@@ -26,6 +26,7 @@ class Gripper(object):
         self.R1_link = dpath.get(config, 'linkages/R1')
         self.L0_link = dpath.get(config, 'linkages/L0')
         self.L1_link = dpath.get(config, 'linkages/L1')
+        self.geometry_l0 = dpath.get(config, 'geometry/l0')
         self.geometry_l1 = dpath.get(config, 'geometry/l1')
         self.geometry_l2 = dpath.get(config, 'geometry/l2')
         self.geometry_l3 = dpath.get(config, 'geometry/l3')

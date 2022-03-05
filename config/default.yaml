@@ -20,6 +20,7 @@ linkages:
   L0: 45
   L1: -45
 geometry:
+  l0: 70 # distance between left center and right center
   l1: 50 # length of proximal links
   l2: 35 # length of distal links
   beta: 150 # angle from l2 to finger surface 
