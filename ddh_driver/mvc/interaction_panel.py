@@ -134,13 +134,19 @@ class InteractionPanel:
         self.model.R0.setpoint = theta
 
     def cmd_r1(self, pt):
-        pass
+        v = pt-self.kinematics_model.pt_O_r
+        theta = np.rad2deg(math.atan2(v[1], v[0]))
+        self.model.R1.setpoint = theta
 
     def cmd_l0(self, pt):
-        pass
+        v = pt-self.kinematics_model.pt_O_l
+        theta = np.rad2deg(math.atan2(v[1], v[0]))
+        self.model.L0.setpoint = theta
 
     def cmd_l1(self, pt):
-        pass
+        v = pt-self.kinematics_model.pt_O_l
+        theta = np.rad2deg(math.atan2(v[1], v[0]))
+        self.model.L1.setpoint = theta
 
     def mouseMoveEvent(self, e: QtGui.QMouseEvent):
         if self.fsm is InteractionState.idle:
