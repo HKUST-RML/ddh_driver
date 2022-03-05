@@ -60,6 +60,26 @@ class KinematicModel:
         l1 = self.gripper.geometry_l1
         return l1 * np.array([np.cos(theta), np.sin(theta)]) + self.pt_O_l
 
+    @property
+    def pt_la(self):
+        l1 = self.gripper.geometry_l1
+        l2 = self.gripper.geometry_l2
+        a1 = np.deg2rad(self.gripper.left_a1)
+        a2 = np.deg2rad(self.gripper.left_a2)
+        vec = np.array([math.cos(a1), math.sin(a1)])
+        mag = math.sqrt(l2**2 - (math.sin(a2)*l1)**2) + math.cos(a2) * l1
+        return vec*mag + self.pt_O_l
+
+    @property
+    def pt_ra(self):
+        l1 = self.gripper.geometry_l1
+        l2 = self.gripper.geometry_l2
+        a1 = np.deg2rad(self.gripper.right_a1)
+        a2 = np.deg2rad(self.gripper.right_a2)
+        vec = np.array([math.cos(a1), math.sin(a1)])
+        mag = math.sqrt(l2**2 - (math.sin(a2)*l1)**2) + math.cos(a2) * l1
+        return vec*mag + self.pt_O_r
+
 
 class InteractionPanel:
 
@@ -99,17 +119,26 @@ class InteractionPanel:
         pt_r1 = self.gripper2ui(self.kinematics_model.pt_r1)
         pt_l0 = self.gripper2ui(self.kinematics_model.pt_l0)
         pt_l1 = self.gripper2ui(self.kinematics_model.pt_l1)
+        pt_la = self.gripper2ui(self.kinematics_model.pt_la)
+        pt_ra = self.gripper2ui(self.kinematics_model.pt_ra)
         # draw the proximal links
         painter.drawLine(O_r, pt_r0)
         painter.drawLine(O_r, pt_r1)
         painter.drawLine(O_l, pt_l0)
         painter.drawLine(O_l, pt_l1)
+        # draw the distal links
+        painter.drawLine(pt_la, pt_l0)
+        painter.drawLine(pt_la, pt_l1)
+        painter.drawLine(pt_ra, pt_r0)
+        painter.drawLine(pt_ra, pt_r1)
         # draw joint
         painter.setBrush(clr_link)
         painter.drawEllipse(pt_r0, 10, 10)
         painter.drawEllipse(pt_r1, 10, 10)
         painter.drawEllipse(pt_l0, 10, 10)
         painter.drawEllipse(pt_l1, 10, 10)
+        painter.drawEllipse(pt_ra, 10, 10)
+        painter.drawEllipse(pt_la, 10, 10)
         painter.end()
         self.view.update()
 
