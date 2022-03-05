@@ -1,3 +1,4 @@
+import math
 from enum import IntEnum, Enum
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QGroupBox
@@ -19,6 +20,12 @@ clr_link = QColor('black')
 clr_joint = clr_link
 clr_joint_highlight = QColor('green')
 clr_background = QColor('white')
+
+CLICK_RADIUS = 20
+
+
+def dist_QPointF(pt1: QPointF, pt2: QPointF):
+    return math.sqrt((pt1.x()-pt2.x())**2 + (pt1.y()-pt2.y())**2)
 
 
 class KinematicModel:
@@ -121,15 +128,49 @@ class InteractionPanel:
         pt = np.array([pt[1], pt[0]]) + self.center
         return QtCore.QPointF(pt[0], pt[1])
 
+    def cmd_r0(self, pt):
+        v = pt-self.kinematics_model.pt_O_r
+        theta = np.rad2deg(math.atan2(v[1], v[0]))
+        self.model.R0.setpoint = theta
+
+    def cmd_r1(self, pt):
+        pass
+
+    def cmd_l0(self, pt):
+        pass
+
+    def cmd_l1(self, pt):
+        pass
+
     def mouseMoveEvent(self, e: QtGui.QMouseEvent):
+        if self.fsm is InteractionState.idle:
+            return
         pos = e.localPos()
         pt = np.array([pos.x(), pos.y()])
         pt = self.ui2gripper(pt)
-        print(pt)
+        if self.fsm is InteractionState.theta_R0:
+            self.cmd_r0(pt)
+        elif self.fsm is InteractionState.theta_R1:
+            self.cmd_r1(pt)
+        elif self.fsm is InteractionState.theta_L0:
+            self.cmd_l0(pt)
+        elif self.fsm is InteractionState.theta_L1:
+            self.cmd_l1(pt)
 
     def on_mouse_release(self, e):
-        print('released')
         self.fsm = InteractionState.idle
 
     def on_mouse_press(self, e):
-        print('pressed')
+        pt_r0 = self.gripper2ui(self.kinematics_model.pt_r0)
+        pt_r1 = self.gripper2ui(self.kinematics_model.pt_r1)
+        pt_l0 = self.gripper2ui(self.kinematics_model.pt_l0)
+        pt_l1 = self.gripper2ui(self.kinematics_model.pt_l1)
+        click_pos = e.localPos()
+        if dist_QPointF(pt_r0, click_pos) < CLICK_RADIUS:
+            self.fsm = InteractionState.theta_R0
+        elif dist_QPointF(pt_r1, click_pos) < CLICK_RADIUS:
+            self.fsm = InteractionState.theta_R1
+        elif dist_QPointF(pt_l0, click_pos) < CLICK_RADIUS:
+            self.fsm = InteractionState.theta_L0
+        elif dist_QPointF(pt_l1, click_pos) < CLICK_RADIUS:
+            self.fsm = InteractionState.theta_L1
