@@ -14,6 +14,8 @@ class InteractionState(Enum):
     theta_R1 = 2
     theta_L0 = 3
     theta_L1 = 4
+    a1a2_right = 5
+    a1a2_left = 6
 
 
 clr_link = QColor('black')
