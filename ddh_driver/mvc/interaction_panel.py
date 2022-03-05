@@ -25,6 +25,11 @@ clr_background = QColor('white')
 
 CLICK_RADIUS = 20
 JOINT_SIZE = 5
+MIN_A2 = 10
+
+
+def vec_norm(v: np.ndarray):
+    return math.sqrt(v.dot(v))
 
 
 def dist_QPointF(pt1: QPointF, pt2: QPointF):
@@ -217,6 +222,30 @@ class InteractionPanel:
         theta = np.rad2deg(math.atan2(v[1], v[0]))
         self.model.L1.setpoint = theta
 
+    def vec2a1a2(self, v):
+        l1 = self.model.geometry_l1
+        l2 = self.model.geometry_l2
+        a1 = np.rad2deg(math.atan2(v[1], v[0]))
+        L = vec_norm(v)
+        a2 = MIN_A2
+        try:
+            a2 = np.rad2deg(math.acos(
+                (l1**2 + v.dot(v) - l2**2)/(2*L*l1)
+            ))
+        except Exception:
+            pass
+        return a1, a2
+
+    def cmd_ra(self, pt):
+        v = pt-self.kinematics_model.pt_O_r
+        a1, a2 = self.vec2a1a2(v)
+        self.model.set_right_a1_a2(a1, a2)
+
+    def cmd_la(self, pt):
+        v = pt-self.kinematics_model.pt_O_l
+        a1, a2 = self.vec2a1a2(v)
+        self.model.set_left_a1_a2(a1, a2)
+
     def mouseMoveEvent(self, e: QtGui.QMouseEvent):
         if self.fsm is InteractionState.idle:
             return
@@ -231,6 +260,10 @@ class InteractionPanel:
             self.cmd_l0(pt)
         elif self.fsm is InteractionState.theta_L1:
             self.cmd_l1(pt)
+        elif self.fsm is InteractionState.a1a2_right:
+            self.cmd_ra(pt)
+        elif self.fsm is InteractionState.a1a2_left:
+            self.cmd_la(pt)
 
     def on_mouse_release(self, e):
         self.fsm = InteractionState.idle
@@ -240,6 +273,8 @@ class InteractionPanel:
         pt_r1 = self.gripper2ui(self.kinematics_model.pt_r1)
         pt_l0 = self.gripper2ui(self.kinematics_model.pt_l0)
         pt_l1 = self.gripper2ui(self.kinematics_model.pt_l1)
+        pt_la = self.gripper2ui(self.kinematics_model.pt_la)
+        pt_ra = self.gripper2ui(self.kinematics_model.pt_ra)
         click_pos = e.localPos()
         if dist_QPointF(pt_r0, click_pos) < CLICK_RADIUS:
             self.fsm = InteractionState.theta_R0
@@ -249,3 +284,7 @@ class InteractionPanel:
             self.fsm = InteractionState.theta_L0
         elif dist_QPointF(pt_l1, click_pos) < CLICK_RADIUS:
             self.fsm = InteractionState.theta_L1
+        elif dist_QPointF(pt_ra, click_pos) < CLICK_RADIUS:
+            self.fsm = InteractionState.a1a2_right
+        elif dist_QPointF(pt_la, click_pos) < CLICK_RADIUS:
+            self.fsm = InteractionState.a1a2_left
