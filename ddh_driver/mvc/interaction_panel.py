@@ -98,6 +98,23 @@ class KinematicModel:
         vec_tip = np.array([math.cos(tip_dir), math.sin(tip_dir)]) * l3
         return self.pt_ra + vec_tip
 
+    @property
+    def dir_tip_left(self):
+        gamma = self.gripper.geometry_gamma
+        r1 = self.gripper.L1.theta
+        a1 = self.gripper.left_a1
+        a2 = self.gripper.left_a2
+        a3 = self.gripper.left_a3
+        dir_distal = r1+a2+a3
+        return dir_distal - 180 + gamma
+
+    @property
+    def pt_tip_left(self):
+        tip_dir = np.deg2rad(self.dir_tip_left)
+        l3 = self.gripper.geometry_l3
+        vec_tip = np.array([math.cos(tip_dir), math.sin(tip_dir)]) * l3
+        return self.pt_la + vec_tip
+
 
 class InteractionPanel:
 
@@ -140,6 +157,7 @@ class InteractionPanel:
         pt_la = self.gripper2ui(self.kinematics_model.pt_la)
         pt_ra = self.gripper2ui(self.kinematics_model.pt_ra)
         pt_tip_right = self.gripper2ui(self.kinematics_model.pt_tip_right)
+        pt_tip_left = self.gripper2ui(self.kinematics_model.pt_tip_left)
         # draw gripper frame
         painter.drawLine(O_r, O_l)
         # draw the proximal links
@@ -154,6 +172,7 @@ class InteractionPanel:
         painter.drawLine(pt_ra, pt_r1)
         # draw fingertip
         painter.drawLine(pt_ra, pt_tip_right)
+        painter.drawLine(pt_la, pt_tip_left)
         # draw joint
         painter.setBrush(clr_link)
         for pt in [pt_r0, pt_r1, pt_l0, pt_l1, pt_ra, pt_la, O_r, O_l]:
