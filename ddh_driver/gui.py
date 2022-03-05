@@ -1,6 +1,6 @@
 import math
 import time
-
+from enum import IntEnum, Enum
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QGroupBox
 from PyQt5.QtCore import QSize
@@ -8,6 +8,7 @@ import pyqtgraph as pg
 import numpy as np
 import sys
 import ddh_driver
+from ddh_driver.mvc import *
 
 
 class DDHModel:
@@ -129,14 +130,6 @@ class StateSetpointPlot:
         self.line_sp.setData(x=self.sp_vt, y=self.sp_v)
 
 
-class InteractPanel:
-
-    def __init__(self, model):
-        self.model = model
-        self.view = QWidget()
-        self.view.setMinimumWidth(600)
-
-
 class DDHMain:
 
     def __init__(self):
@@ -144,7 +137,7 @@ class DDHMain:
         # setup sub-controllers
         self.actuators_panel = ControlPanel(self.model)
         self.plot_panel = PlotPanel(self.model)
-        self.interact_panel = InteractPanel(self.model)
+        self.interact_panel = InteractionPanel(self.model)
         # setup view
         self.view = QWidget()
         self.init_view()
