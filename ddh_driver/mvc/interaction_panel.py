@@ -22,6 +22,7 @@ clr_joint_highlight = QColor('green')
 clr_background = QColor('white')
 
 CLICK_RADIUS = 20
+JOINT_SIZE = 5
 
 
 def dist_QPointF(pt1: QPointF, pt2: QPointF):
@@ -121,6 +122,8 @@ class InteractionPanel:
         pt_l1 = self.gripper2ui(self.kinematics_model.pt_l1)
         pt_la = self.gripper2ui(self.kinematics_model.pt_la)
         pt_ra = self.gripper2ui(self.kinematics_model.pt_ra)
+        # draw gripper frame
+        painter.drawLine(O_r, O_l)
         # draw the proximal links
         painter.drawLine(O_r, pt_r0)
         painter.drawLine(O_r, pt_r1)
@@ -133,12 +136,8 @@ class InteractionPanel:
         painter.drawLine(pt_ra, pt_r1)
         # draw joint
         painter.setBrush(clr_link)
-        painter.drawEllipse(pt_r0, 10, 10)
-        painter.drawEllipse(pt_r1, 10, 10)
-        painter.drawEllipse(pt_l0, 10, 10)
-        painter.drawEllipse(pt_l1, 10, 10)
-        painter.drawEllipse(pt_ra, 10, 10)
-        painter.drawEllipse(pt_la, 10, 10)
+        for pt in [pt_r0, pt_r1, pt_l0, pt_l1, pt_ra, pt_la, O_r, O_l]:
+            painter.drawEllipse(pt, JOINT_SIZE, JOINT_SIZE)
         painter.end()
         self.view.update()
 
