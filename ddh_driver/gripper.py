@@ -34,6 +34,8 @@ class Gripper(object):
         self.r_max_offset = dpath.get(config, 'geometry/r_max_offset')
         self.r_min_offset = dpath.get(config, 'geometry/r_min_offset')
 
+        # a2 when distal links in singularity (collinear)
+        self.a2_sing = rad2deg(np.arcsin(self.geometry_l2/self.geometry_l1))
         # virtual link formed by l2 and l3
         self._l3 = np.sqrt(self.geometry_l2**2 + self.geometry_l3**2 - 2 * self.geometry_l2 * self.geometry_l3 * np.cos(deg2rad(self.geometry_gamma)))
         # angle between l2 and _l3
@@ -94,9 +96,15 @@ class Gripper(object):
         self.L0.theta = a1+a2
         self.L1.theta = a1-a2
 
+    # forward kinematics function: link angles to a1, a2 angle 
+    def link_to_a1(self, l0, l1):
+        return (l0+l1)/2
+    def link_to_a2(self, l0, l1):
+        return np.absolute(l0-l1)/2
+
     @property
     def right_a1(self):
-        return (self.R0.theta+self.R1.theta)/2
+        return self.link_to_a1(self.R0.theta, self.R1.theta)
 
     @right_a1.setter
     def right_a1(self, a1):
@@ -104,7 +112,7 @@ class Gripper(object):
 
     @property
     def right_a2(self):
-        return (self.R1.theta-self.R0.theta)/2
+        return self.link_to_a2(self.R0.theta, self.R1.theta)
 
     @right_a2.setter
     def right_a2(self, a2):
@@ -112,7 +120,7 @@ class Gripper(object):
 
     @property
     def left_a1(self):
-        return (self.L0.theta+self.L1.theta)/2
+        return self.link_to_a1(self.L0.theta, self.L1.theta)
 
     @left_a1.setter
     def left_a1(self, a1):
@@ -120,79 +128,115 @@ class Gripper(object):
 
     @property
     def left_a2(self):
-        return (self.L0.theta-self.L1.theta)/2
+        return self.link_to_a2(self.L0.theta, self.L1.theta)
 
     @left_a2.setter
     def left_a2(self, a2):
         self.set_left_a1_a2(self.left_a1, a2)
 
     # r: distance from motor joint to distal joint (base joint of finger)
+    # forward kinematics function: a2 angle to r distance
+    def a2_to_r(self, a2):
+        if a2 > self.a2_sing:
+            return  self.geometry_l1*np.cos(deg2rad(a2))
+        else: 
+            return self.geometry_l1*np.cos(deg2rad(a2)) + np.sqrt(self.geometry_l2**2 - (self.geometry_l1*np.sin(deg2rad(a2)))**2)
 
     @property
     def left_finger_dist(self):
-        distal_r = np.sqrt(self.geometry_l2**2 - (self.geometry_l1*np.sin(deg2rad(self.left_a2)))**2)
-        if np.isnan(distal_r):
-            distal_r = 0
-        return self.geometry_l1*np.cos(deg2rad(self.left_a2)) + distal_r
+        return self.a2_to_r(self.left_a2)
 
     @property
     def right_finger_dist(self):
-        distal_r = np.sqrt(self.geometry_l2**2 - (self.geometry_l1*np.sin(deg2rad(self.right_a2)))**2)
-        if np.isnan(distal_r):
-            distal_r = 0
-        return self.geometry_l1*np.cos(deg2rad(self.right_a2)) + distal_r
+        return self.a2_to_r(self.right_a2)
+
+    # forward kinematics function: r, a2 angle to distal joint coordinate
+    def r_a1_to_rx_ry(self, r, a1):
+        # rx, ry
+        return r * np.cos(deg2rad(a1)), r * np.sin(deg2rad(a1))
 
     # position of distal joint (base joint of finger) in motor frame
-
     @property
     def left_finger_pos(self): 
-        x = self.left_finger_dist * np.cos(deg2rad(self.left_a1))
-        y = self.left_finger_dist * np.sin(deg2rad(self.left_a1))
-        return x, y
+        return self.r_a1_to_rx_ry(self.left_finger_dist, self.left_a1)
 
     @property
     def right_finger_pos(self): 
-        x = self.right_finger_dist * np.cos(deg2rad(self.right_a1))
-        y = self.right_finger_dist * np.sin(deg2rad(self.right_a1))
-        return x, y
+        return self.r_a1_to_rx_ry(self.right_finger_dist, self.right_a1)
 
     # a3: angle between distal link (L2) and vector from origin to distal joint
+    # forward kinematics function: r distance to a3 angle
+    def r_to_a3(self, r):
+        return rad2deg(np.arccos((self.geometry_l1**2 - self.geometry_l2**2 - r**2)/(-2 * self.geometry_l2 * r)))
 
     @property
     def left_a3(self):
-        return rad2deg(np.arccos((self.geometry_l1**2 - self.geometry_l2**2 - self.left_finger_dist**2)/(-2 * self.geometry_l2 * self.left_finger_dist)))
+        return self.r_to_a3(self.left_finger_dist)
 
     @property
     def right_a3(self):
-        return rad2deg(np.arccos((self.geometry_l1**2 - self.geometry_l2**2 - self.right_finger_dist**2)/(-2 * self.geometry_l2 * self.right_finger_dist)))
+        return self.r_to_a3(self.right_finger_dist)
 
     # phi: angle of finger surface relative to x axis
+    # forward kinematics function: link angles to phi angle
+    def link_to_phi(self, l0, l1, finger):
+        a1 = self.link_to_a1(l0,l1)
+        r = self.a2_to_r(self.link_to_a2(l0,l1))
+        a3 = self.r_to_a3(r)
+        if finger == 'L':
+            return self.a1a3_to_L_phi(a1,a3)
+        elif finger == 'R':
+            return self.a1a3_to_R_phi(a1,a3)
+    
+    # forward kinematics function: a1, a3 angles to finger phi angle
+    def a1a3_to_L_phi(self, a1, a3):
+        return a1 + a3 + self.geometry_beta - 180
+    def a1a3_to_R_phi(self, a1, a3):
+        return a1 - (a3 + self.geometry_beta - 180)
 
     @property
     def left_phi(self):
-        return self.left_a1 + self.left_a3 + self.geometry_beta - 180
+        return self.a1a3_to_L_phi(self.left_a1, self.left_a3)
 
     @property
     def right_phi(self):
-        return self.right_a1 - (self.right_a3 + self.geometry_beta - 180)
+        return self.a1a3_to_R_phi(self.right_a1, self.right_a3)
 
     # position of fingertip in motor frame
+    # forward kinematics function: link angles to tip coordinate
+    def link_to_tip(self, l0, l1, finger):
+        a1 = self.link_to_a1(l0,l1)
+        r = self.a2_to_r(self.link_to_a2(l0,l1))
+        a3 = self.r_to_a3(r)
+        rxry = self.r_a1_to_rx_ry(r, a1)
+        if finger == 'L':
+            return self.get_L_tip(a1, a3, rxry)
+        elif finger == 'R':
+            return self.get_R_tip(a1,a3,rxry)
+
+    # forward kinematics function: a1, a3 angles to left tip coordinate
+    def get_L_tip(self, a1, a3, rxry):
+        # angle of l3 relative to x axis
+        q_tip = a1 + a3 + self.geometry_gamma - 180
+        x = rxry[0] + self.geometry_l3 * np.cos(deg2rad(q_tip))
+        y = rxry[1] + self.geometry_l3 * np.sin(deg2rad(q_tip))
+        return x, y
 
     @property
     def left_tip_pos(self):
+        return self.get_L_tip(self.left_a1, self.left_a3, self.left_finger_pos)
+
+    # forward kinematics function: a1, a3 angles to right tip coordinate
+    def get_R_tip(self, a1, a3, rxry):
         # angle of l3 relative to x axis
-        q_tip = self.left_a1 + self.left_a3 + self.geometry_gamma - 180
-        x = self.left_finger_pos[0] + self.geometry_l3 * np.cos(deg2rad(q_tip))
-        y = self.left_finger_pos[1] + self.geometry_l3 * np.sin(deg2rad(q_tip))
+        q_tip = a1 - (a3 + self.geometry_gamma - 180)
+        x = rxry[0] + self.geometry_l3 * np.cos(deg2rad(q_tip))
+        y = rxry[1] + self.geometry_l3 * np.sin(deg2rad(q_tip))
         return x, y
 
     @property
     def right_tip_pos(self):
-        # angle of l3 relative to x axis
-        q_tip = self.right_a1 - (self.right_a3 + self.geometry_gamma - 180)
-        x = self.right_finger_pos[0] + self.geometry_l3 * np.cos(deg2rad(q_tip))
-        y = self.right_finger_pos[1] + self.geometry_l3 * np.sin(deg2rad(q_tip))
-        return x, y
+        return self.get_R_tip(self.right_a1, self.right_a3, self.right_finger_pos)
 
     # then add inverse kinematics
 
